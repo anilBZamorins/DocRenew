@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DocRenew — Presentation Content & Speaker Notes</title>
+<style>
+  :root{
+    --navy:#0b2545; --blue:#1d6fb8; --teal:#12a4a4; --ink:#16324f; --muted:#5b6b7d;
+    --line:#dbe6f1; --sky:#eaf2fb; --bg:#f7fafd; --green:#2fa27a; --amber:#e8a33d; --red:#d95d5d;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    background:var(--bg);color:var(--ink);line-height:1.6;
+    -webkit-font-smoothing:antialiased;padding:0 0 80px}
+  .wrap{max-width:920px;margin:0 auto;padding:0 24px}
+
+  /* header */
+  header{background:
+      radial-gradient(900px 500px at 88% -30%, rgba(29,111,184,.5), transparent 60%),
+      radial-gradient(700px 500px at -10% 130%, rgba(18,164,164,.4), transparent 55%),
+      linear-gradient(135deg,#0b2545,#123a63 60%,#0e2a4a);
+    color:#eaf3ff;padding:56px 0 48px;margin-bottom:44px}
+  header .wrap{display:block}
+  .eyebrow{display:inline-flex;align-items:center;gap:12px;font-size:12.5px;font-weight:800;
+    letter-spacing:.22em;text-transform:uppercase;color:#7fd4d4;margin-bottom:18px}
+  .eyebrow::before{content:"";width:34px;height:2px;background:var(--teal);border-radius:2px}
+  header h1{font-size:40px;line-height:1.1;font-weight:850;letter-spacing:-.02em;margin-bottom:10px}
+  header .sub{font-size:19px;color:#c3daf2;font-weight:400;margin-bottom:22px}
+  .byline{display:flex;flex-wrap:wrap;gap:10px 18px;font-size:14.5px;color:#9fc0e4;align-items:center}
+  .byline b{color:#fff;font-weight:700}
+  .byline .sep{color:var(--teal)}
+  .intro{background:#fff;border:1px solid var(--line);border-radius:14px;padding:20px 24px;
+    margin-bottom:40px;color:var(--muted);font-size:15px;box-shadow:0 8px 24px rgba(11,37,69,.05)}
+  .intro b{color:var(--navy)}
+
+  /* slide blocks */
+  .slide{background:#fff;border:1px solid var(--line);border-radius:16px;overflow:hidden;
+    margin-bottom:26px;box-shadow:0 10px 30px rgba(11,37,69,.06)}
+  .slide-head{display:flex;align-items:center;gap:16px;padding:20px 26px;
+    background:linear-gradient(90deg,#f2f8ff,#ffffff);border-bottom:1px solid var(--line)}
+  .num{flex:0 0 auto;width:40px;height:40px;border-radius:11px;display:grid;place-items:center;
+    background:linear-gradient(135deg,var(--teal),var(--blue));color:#fff;font-weight:850;font-size:17px;
+    box-shadow:0 8px 18px rgba(18,164,164,.35)}
+  .slide-head h2{font-size:22px;color:var(--navy);font-weight:800;letter-spacing:-.01em;line-height:1.2}
+  .slide-head .tag{margin-left:auto;font-size:11px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;
+    color:var(--blue);background:var(--sky);padding:6px 12px;border-radius:100px;white-space:nowrap}
+  .slide-body{padding:24px 26px}
+  .label{font-size:11.5px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--teal);
+    margin:0 0 12px}
+  .onslide h3{font-size:17px;color:var(--navy);font-weight:750;margin-bottom:12px}
+  ul{list-style:none;margin:2px 0 4px}
+  ul li{position:relative;padding-left:26px;margin-bottom:9px;font-size:15px}
+  ul li::before{content:"";position:absolute;left:2px;top:9px;width:9px;height:9px;border-radius:50%;
+    background:var(--blue)}
+  ul li b{color:var(--navy);font-weight:700}
+  .meta{font-size:14px;color:var(--muted);margin-top:10px}
+  .meta b{color:var(--navy)}
+
+  /* say-this callout */
+  .say{margin-top:22px;background:#f4f9ff;border:1px solid #d3e6fa;border-left:4px solid var(--teal);
+    border-radius:12px;padding:18px 22px}
+  .say p{font-size:15px;color:var(--ink);font-style:italic}
+  .say .label{color:var(--blue)}
+
+  /* table */
+  table{width:100%;border-collapse:collapse;margin:6px 0 4px;font-size:14.5px}
+  th,td{text-align:left;padding:11px 14px;border-bottom:1px solid var(--line)}
+  th{background:var(--sky);color:var(--navy);font-weight:750;font-size:12.5px;letter-spacing:.02em}
+  tr:last-child td{border-bottom:none}
+  .pill{display:inline-block;font-size:11px;font-weight:800;padding:3px 10px;border-radius:100px}
+  .pill.g{background:rgba(47,162,122,.16);color:#1f7a56}
+  .pill.a{background:rgba(232,163,61,.18);color:#9a6a12}
+  .pill.r{background:rgba(217,93,93,.16);color:#a23b3b}
+  .chips{display:flex;flex-wrap:wrap;gap:9px;margin-top:6px}
+  .chips span{background:var(--sky);border:1px solid var(--line);color:var(--navy);font-weight:600;
+    font-size:14px;padding:8px 15px;border-radius:100px}
+
+  /* stats */
+  .statrow{display:flex;gap:20px;flex-wrap:wrap;margin:6px 0 14px}
+  .statrow .s{flex:1;min-width:130px;border-left:4px solid var(--teal);padding-left:16px}
+  .statrow .s .n{font-size:38px;font-weight:850;color:var(--navy);line-height:1}
+  .statrow .s .l{font-size:13px;color:var(--muted);margin-top:4px}
+
+  /* qa */
+  .qa{background:var(--navy);color:#eaf3ff;border-radius:16px;padding:30px 28px;margin-top:36px}
+  .qa h2{font-size:22px;font-weight:800;margin-bottom:6px}
+  .qa .label{color:#7fd4d4}
+  .qa .item{padding:14px 0;border-bottom:1px solid rgba(255,255,255,.12)}
+  .qa .item:last-child{border-bottom:none}
+  .qa .q{font-weight:750;color:#fff;font-size:15px;margin-bottom:4px}
+  .qa .a{color:#bcd6f2;font-size:14.5px}
+
+  footer.f{text-align:center;color:var(--muted);font-size:13px;margin-top:40px}
+  @media print{
+    body{background:#fff}
+    .slide,.intro{box-shadow:none;break-inside:avoid}
+    header{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+    .qa,.num,.say,th,.pill,.chips span,.statrow .s{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  }
+  @media (max-width:640px){
+    header h1{font-size:30px}.slide-head h2{font-size:19px}.slide-head .tag{display:none}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap">
+    <div class="eyebrow">Presentation Content &amp; Speaker Notes</div>
+    <h1>DocRenew</h1>
+    <div class="sub">Employee Document Renewal Management System</div>
+    <div class="byline">
+      <span>Presented by <b>Anil B</b></span><span class="sep">·</span>
+      <span>Angular Developer</span><span class="sep">·</span>
+      <span>Zamorins Solutions</span>
+    </div>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <div class="intro">
+    This guide holds the content of every slide plus a short <b>“Say this”</b> script you can speak while
+    presenting. The full talk runs about <b>6–8 minutes</b> at a comfortable pace.
+  </div>
+
+  <!-- 1 -->
+  <section class="slide">
+    <div class="slide-head"><span class="num">1</span><h2>Title</h2><span class="tag">Opening</span></div>
+    <div class="slide-body">
+      <div class="onslide">
+        <p class="label">On the slide</p>
+        <h3>DocRenew — Employee Document Renewal Management System</h3>
+        <p class="meta">Presented by Anil B, Angular Developer, Zamorins Solutions.</p>
+      </div>
+      <div class="say"><p class="label">Say this</p>
+        <p>“Good morning everyone. I'm Anil, an Angular Developer at Zamorins Solutions. Today I'll walk you through DocRenew — an Employee Document Renewal Management System that helps organizations make sure important employee documents never expire without warning.”</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 2 -->
+  <section class="slide">
+    <div class="slide-head"><span class="num">2</span><h2>The Problem</h2><span class="tag">Context</span></div>
+    <div class="slide-body">
+      <div class="onslide">
+        <p class="label">On the slide</p>
+        <h3>Documents expire quietly — until they cost you.</h3>
+        <ul>
+          <li><b>Legal &amp; regulatory risk</b> — an expired visa or permit means fines, failed audits, and a workforce no longer cleared to work.</li>
+          <li><b>Operational disruption</b> — a lapsed certification pulls a driver, nurse, or operator off the job, halting work with no warning.</li>
+          <li><b>Manual, reactive tracking</b> — HR chases deadlines by hand across scattered files; it doesn't scale and fails silently.</li>
+        </ul>
+        <p class="meta"><b>Tracked per employee:</b> Passports · Visas · Work Permits · Licenses · Certifications</p>
+      </div>
+      <div class="say"><p class="label">Say this</p>
+        <p>“Every organization manages critical documents for its people — passports, visas, work permits, licenses, certifications. The problem is that these expire quietly. When even one is missed, the consequences are real: legal penalties and failed audits, operations disrupted because someone is no longer cleared to work, and HR teams stuck tracking everything manually. That manual tracking is the root issue — it doesn't scale, and it fails without anyone noticing until it's too late.”</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 3 -->
+  <section class="slide">
+    <div class="slide-head"><span class="num">3</span><h2>The Solution</h2><span class="tag">Product</span></div>
+    <div class="slide-body">
+      <div class="onslide">
+        <p class="label">On the slide</p>
+        <h3>One system that watches every deadline for you.</h3>
+        <ul>
+          <li><b>Proactive, not reactive</b> — renewals start on time, automatically.</li>
+          <li><b>Everyone accountable</b> — employee and HR notified in parallel.</li>
+          <li><b>Full visibility</b> — a live dashboard of every document's status.</li>
+        </ul>
+        <p class="meta"><i>Visual: a live “document status” panel showing items due, expiring, and renewed.</i></p>
+      </div>
+      <div class="say"><p class="label">Say this</p>
+        <p>“DocRenew solves this with one central system that watches every deadline for you. Instead of reacting when something has already expired, it's proactive — the renewal process starts on time, automatically. Both the employee and HR are notified in parallel, so accountability is shared. And everything is visible on a single live dashboard showing what's upcoming, what's expiring, and what's already renewed.”</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 4 -->
+  <section class="slide">
+    <div class="slide-head"><span class="num">4</span><h2>How It Works</h2><span class="tag">Workflow</span></div>
+    <div class="slide-body">
+      <div class="onslide">
+        <p class="label">On the slide</p>
+        <h3>Escalating reminders on a proven timeline.</h3>
+        <table>
+          <thead><tr><th>When</th><th>Who</th><th>Purpose</th></tr></thead>
+          <tbody>
+            <tr><td><span class="pill g">3 Months</span></td><td>Employee &amp; Company</td><td>Begin the renewal process early</td></tr>
+            <tr><td><span class="pill g">1 Month</span></td><td>Employee &amp; Company</td><td>Follow-up if still pending</td></tr>
+            <tr><td><span class="pill a">5 Days</span></td><td>Employee &amp; Company</td><td>Urgent — avoid expiration</td></tr>
+            <tr><td><span class="pill r">On Expiry</span></td><td>Employee &amp; Company</td><td>Expired — act immediately</td></tr>
+            <tr><td><span class="pill r">After Expiry</span></td><td>Management</td><td>Escalation for overdue renewals</td></tr>
+          </tbody>
+        </table>
+        <p class="meta"><b>Delivered by:</b> Email · SMS · Mobile App</p>
+      </div>
+      <div class="say"><p class="label">Say this</p>
+        <p>“The heart of the system is an escalating reminder timeline. Three months before a document expires, both the employee and the company get an early reminder. One month out, a follow-up if it's still pending. Five days before, an urgent alert. On the expiry date, an immediate action notice — and if it still isn't handled, it escalates to management. Every reminder goes out across email, SMS, and mobile app, so nothing gets buried in an inbox.”</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 5 -->
+  <section class="slide">
+    <div class="slide-head"><span class="num">5</span><h2>Platform Features</h2><span class="tag">Capabilities</span></div>
+    <div class="slide-body">
+      <div class="onslide">
+        <p class="label">On the slide</p>
+        <h3>Everything HR needs in one place.</h3>
+        <ul>
+          <li><b>Central repository</b> — every document in one secure home.</li>
+          <li><b>Secure storage</b> — encrypted details, access-controlled.</li>
+          <li><b>Automated reminders</b> — timely alerts fire with zero effort.</li>
+          <li><b>Dual schedules</b> — separate notification tracks for employees and HR.</li>
+          <li><b>Live dashboard</b> — upcoming, expired, and renewed at a glance.</li>
+          <li><b>Status &amp; reporting</b> — track progress and generate reports.</li>
+          <li><b>Role-based access</b> — Admin, HR, Manager, and Employee views.</li>
+          <li><b>Configurable rules</b> — custom reminder schedules per document.</li>
+        </ul>
+      </div>
+      <div class="say"><p class="label">Say this</p>
+        <p>“As a platform, DocRenew brings everything HR needs into one place: a central, secure repository for all documents; automated reminders that need zero manual effort; separate notification schedules for employees and HR; a live dashboard; status tracking and reporting; role-based access for admins, HR, managers and employees; and fully configurable reminder rules for each document type.”</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 6 -->
+  <section class="slide">
+    <div class="slide-head"><span class="num">6</span><h2>Why It Matters</h2><span class="tag">Benefits</span></div>
+    <div class="slide-body">
+      <div class="onslide">
+        <p class="label">On the slide</p>
+        <h3>Measurable impact from day one.</h3>
+        <div class="statrow">
+          <div class="s"><div class="n">0</div><div class="l">missed renewals</div></div>
+          <div class="s"><div class="n">90%</div><div class="l">less manual tracking for HR</div></div>
+          <div class="s"><div class="n">24/7</div><div class="l">automated monitoring</div></div>
+        </div>
+        <ul>
+          <li>Prevents missed renewals before they become incidents.</li>
+          <li>Ensures legal &amp; regulatory compliance across the workforce.</li>
+          <li>Frees HR from chasing deadlines.</li>
+          <li>Improves employee awareness and accountability.</li>
+          <li>Minimizes business disruption from expired documents.</li>
+        </ul>
+      </div>
+      <div class="say"><p class="label">Say this</p>
+        <p>“The impact is measurable from day one. The goal is zero missed renewals, up to ninety percent less manual tracking for HR, and round-the-clock automated monitoring. Beyond the numbers, it keeps the organization compliant, makes employees more aware and accountable, and prevents the business disruptions that expired documents cause.”</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 7 -->
+  <section class="slide">
+    <div class="slide-head"><span class="num">7</span><h2>Market</h2><span class="tag">Who it's for</span></div>
+    <div class="slide-body">
+      <div class="onslide">
+        <p class="label">On the slide</p>
+        <h3>Built for compliance-driven teams.</h3>
+        <div class="chips">
+          <span>Manufacturing</span><span>Construction</span><span>Logistics &amp; Transport</span>
+          <span>Healthcare</span><span>Government</span><span>Corporate HR</span>
+        </div>
+        <p class="meta"><i>“Wherever a workforce carries permits, licenses, or certifications, DocRenew removes the risk of expiry.”</i></p>
+      </div>
+      <div class="say"><p class="label">Say this</p>
+        <p>“DocRenew is built for any compliance-driven organization — manufacturing, construction, logistics, healthcare, government, and corporate HR teams. Essentially, wherever a workforce carries permits, licenses, or certifications, this system removes the risk of a document quietly expiring.”</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 8 -->
+  <section class="slide">
+    <div class="slide-head"><span class="num">8</span><h2>Technology Vision</h2><span class="tag">Tech</span></div>
+    <div class="slide-body">
+      <div class="onslide">
+        <p class="label">On the slide</p>
+        <h3>A cloud-based SaaS platform — web and mobile.</h3>
+        <ul>
+          <li><b>Cloud-native SaaS</b> — accessible anywhere, always current, no infrastructure to maintain.</li>
+          <li><b>Configurable by design</b> — custom reminder schedules and profile management per organization.</li>
+          <li><b>Web &amp; mobile access</b> — manage documents and receive alerts on desktop or on the go.</li>
+          <li><b>Compliance reporting</b> — generate audit-ready reports on demand.</li>
+        </ul>
+      </div>
+      <div class="say"><p class="label">Say this</p>
+        <p>“On the technology side, DocRenew is envisioned as a cloud-based SaaS platform. It's accessible anywhere with nothing for the customer to maintain, configurable to each organization's needs, available on both web and mobile, and able to generate audit-ready compliance reports on demand — proof of compliance in a single click.”</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 9 -->
+  <section class="slide">
+    <div class="slide-head"><span class="num">9</span><h2>Closing</h2><span class="tag">Wrap-up</span></div>
+    <div class="slide-body">
+      <div class="onslide">
+        <p class="label">On the slide</p>
+        <h3>Compliance that manages itself.</h3>
+        <p class="meta">DocRenew keeps organizations and employees compliant — ensuring every critical document is renewed on time through proactive notifications and centralized tracking.</p>
+        <p class="meta" style="margin-top:8px">Anil B · Angular Developer, Zamorins Solutions · contact@zamorinstech.com</p>
+      </div>
+      <div class="say"><p class="label">Say this</p>
+        <p>“To sum up: DocRenew is compliance that manages itself. By combining proactive, escalating notifications with centralized tracking, it makes sure every critical document is renewed on time — protecting the organization and its people. Thank you. I'm happy to take any questions.”</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- QA -->
+  <section class="qa">
+    <p class="label">Prepare for questions</p>
+    <h2>Quick Q&amp;A prep</h2>
+    <div class="item"><div class="q">How are the reminder times set?</div><div class="a">They're configurable per document type; the defaults are 3 months, 1 month, 5 days, on expiry, and after expiry.</div></div>
+    <div class="item"><div class="q">Who receives the alerts?</div><div class="a">Employees and the company in parallel; overdue cases escalate to management.</div></div>
+    <div class="item"><div class="q">What notification channels are used?</div><div class="a">Email, SMS, and mobile/app push notifications.</div></div>
+    <div class="item"><div class="q">Who can access what?</div><div class="a">Role-based access — Admin, HR, Manager, and Employee, each with the right view.</div></div>
+    <div class="item"><div class="q">Where does it run?</div><div class="a">A cloud-based SaaS platform, available on web and mobile.</div></div>
+  </section>
+
+  <footer class="f">DocRenew · Employee Document Renewal Management System · Zamorins Solutions</footer>
+
+</div>
+</body>
+</html>

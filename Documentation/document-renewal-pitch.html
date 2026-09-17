@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DocRenew — Employee Document Renewal Management System</title>
+<style>
+  :root{
+    --navy:#0b2545;
+    --blue:#134074;
+    --blue2:#1d6fb8;
+    --teal:#12a4a4;
+    --sky:#e8f1fb;
+    --ink:#0f2033;
+    --muted:#5b6b7d;
+    --line:#d9e4f0;
+    --white:#ffffff;
+    --amber:#e8a33d;
+    --red:#d95d5d;
+    --green:#2fa27a;
+    --shadow:0 20px 60px rgba(11,37,69,.18);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    background:#08192f;
+    color:var(--ink);
+    overflow:hidden;
+    -webkit-font-smoothing:antialiased;
+  }
+
+  /* Deck / slides */
+  .deck{position:relative;width:100vw;height:100vh;}
+  .slide{
+    position:absolute;inset:0;
+    display:flex;flex-direction:column;
+    padding:6vh 7vw 9vh;
+    opacity:0;visibility:hidden;
+    transform:translateY(18px) scale(.995);
+    transition:opacity .5s ease, transform .5s ease, visibility .5s;
+    background:
+      radial-gradient(1200px 700px at 88% -10%, rgba(29,111,184,.10), transparent 60%),
+      radial-gradient(900px 600px at -8% 108%, rgba(18,164,164,.10), transparent 55%),
+      linear-gradient(180deg,#ffffff 0%,#f6faff 100%);
+    overflow:hidden;
+  }
+  .slide.active{opacity:1;visibility:visible;transform:none;z-index:2}
+
+  /* Cover slide is dark */
+  .slide.cover{
+    background:
+      radial-gradient(1000px 700px at 82% -20%, rgba(29,111,184,.55), transparent 60%),
+      radial-gradient(900px 700px at -10% 120%, rgba(18,164,164,.40), transparent 55%),
+      linear-gradient(135deg,#0b2545 0%,#123a63 55%,#0e2a4a 100%);
+    color:#eaf3ff;
+    justify-content:center;
+  }
+
+  /* Section eyebrow */
+  .eyebrow{
+    display:inline-flex;align-items:center;gap:.5rem;
+    font-size:.78rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;
+    color:var(--blue2);
+    margin-bottom:1.1rem;
+  }
+  .eyebrow::before{content:"";width:26px;height:2px;background:var(--teal);display:inline-block;border-radius:2px}
+  .cover .eyebrow{color:#8fd3d3}
+  .cover .eyebrow::before{background:#8fd3d3}
+
+  h1{font-size:clamp(2.4rem,5.2vw,4.4rem);line-height:1.02;letter-spacing:-.02em;font-weight:800}
+  h2{font-size:clamp(1.7rem,3.4vw,2.7rem);line-height:1.08;letter-spacing:-.01em;font-weight:800;color:var(--navy)}
+  .lead{font-size:clamp(1rem,1.5vw,1.28rem);color:var(--muted);max-width:60ch;line-height:1.5;margin-top:1rem}
+  .cover .lead{color:#c3d8f2;max-width:64ch}
+
+  .slide-head{margin-bottom:2.2rem}
+  .body{flex:1;display:flex;flex-direction:column;justify-content:center}
+
+  /* Cover specifics */
+  .brand{display:flex;align-items:center;gap:.75rem;margin-bottom:2.4rem}
+  .logo{
+    width:46px;height:46px;border-radius:12px;
+    background:linear-gradient(135deg,var(--teal),var(--blue2));
+    display:grid;place-items:center;box-shadow:0 10px 30px rgba(18,164,164,.4);
+  }
+  .logo svg{width:26px;height:26px}
+  .brand-name{font-weight:800;font-size:1.15rem;letter-spacing:.02em}
+  .cover-tag{
+    margin-top:2.6rem;display:inline-flex;gap:1.4rem;flex-wrap:wrap;
+    font-size:.92rem;color:#bcd4f0
+  }
+  .cover-tag span{display:inline-flex;align-items:center;gap:.5rem}
+  .dot{width:7px;height:7px;border-radius:50%;background:var(--teal);display:inline-block}
+
+  /* Grids & cards */
+  .grid{display:grid;gap:1.15rem}
+  .g2{grid-template-columns:repeat(2,1fr)}
+  .g3{grid-template-columns:repeat(3,1fr)}
+  .g4{grid-template-columns:repeat(4,1fr)}
+  .card{
+    background:var(--white);border:1px solid var(--line);border-radius:16px;
+    padding:1.5rem 1.5rem;box-shadow:0 8px 24px rgba(11,37,69,.06);
+    transition:transform .25s ease, box-shadow .25s ease;
+  }
+  .card:hover{transform:translateY(-4px);box-shadow:var(--shadow)}
+  .card .ic{
+    width:44px;height:44px;border-radius:11px;display:grid;place-items:center;margin-bottom:1rem;
+    background:var(--sky);color:var(--blue2)
+  }
+  .card .ic svg{width:24px;height:24px}
+  .card h3{font-size:1.08rem;color:var(--navy);margin-bottom:.4rem;font-weight:750}
+  .card p{font-size:.93rem;color:var(--muted);line-height:1.5}
+
+  /* Stat row */
+  .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:1.5rem;margin-top:.4rem}
+  .stat{padding:.4rem .2rem;border-left:3px solid var(--teal);padding-left:1.1rem}
+  .stat .num{font-size:clamp(1.8rem,3.4vw,2.6rem);font-weight:850;color:var(--navy);letter-spacing:-.02em}
+  .stat .lbl{font-size:.9rem;color:var(--muted);margin-top:.25rem}
+
+  /* Problem list */
+  .risk{display:flex;gap:1rem;align-items:flex-start;padding:1.05rem 1.2rem;background:var(--white);border:1px solid var(--line);border-radius:14px}
+  .risk .rx{width:38px;height:38px;border-radius:10px;background:rgba(217,93,93,.12);color:var(--red);display:grid;place-items:center;flex:0 0 auto}
+  .risk .rx svg{width:20px;height:20px}
+  .risk h3{font-size:1rem;color:var(--navy);margin-bottom:.2rem}
+  .risk p{font-size:.9rem;color:var(--muted);line-height:1.45}
+
+  /* Timeline (notification workflow) */
+  .timeline{display:grid;grid-template-columns:repeat(5,1fr);gap:1rem;margin-top:1rem;position:relative}
+  .tl-track{position:absolute;top:34px;left:6%;right:6%;height:3px;background:linear-gradient(90deg,var(--green),var(--amber),var(--red));border-radius:3px;z-index:0}
+  .tl{position:relative;z-index:1;text-align:center}
+  .tl .pin{width:22px;height:22px;border-radius:50%;background:#fff;border:4px solid var(--blue2);margin:24px auto 1rem;box-shadow:0 0 0 5px rgba(29,111,184,.12)}
+  .tl.g .pin{border-color:var(--green);box-shadow:0 0 0 5px rgba(47,162,122,.14)}
+  .tl.a .pin{border-color:var(--amber);box-shadow:0 0 0 5px rgba(232,163,61,.16)}
+  .tl.r .pin{border-color:var(--red);box-shadow:0 0 0 5px rgba(217,93,93,.16)}
+  .tl .when{font-weight:800;color:var(--navy);font-size:1.02rem}
+  .tl .who{font-size:.78rem;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--blue2);margin:.35rem 0 .45rem}
+  .tl .why{font-size:.85rem;color:var(--muted);line-height:1.4}
+
+  /* Two-column split */
+  .split{display:grid;grid-template-columns:1.05fr .95fr;gap:2.6rem;align-items:center}
+  .bullets{list-style:none;display:flex;flex-direction:column;gap:1rem;margin-top:1.4rem}
+  .bullets li{display:flex;gap:.85rem;align-items:flex-start;font-size:1.02rem;color:var(--ink)}
+  .bullets .chk{width:26px;height:26px;border-radius:50%;background:var(--sky);color:var(--blue2);display:grid;place-items:center;flex:0 0 auto;margin-top:1px}
+  .bullets .chk svg{width:15px;height:15px}
+  .bullets strong{color:var(--navy);font-weight:750}
+  .panel{
+    background:linear-gradient(150deg,var(--navy),#164a7d);border-radius:22px;padding:2.2rem;color:#eaf3ff;box-shadow:var(--shadow);
+  }
+  .panel h3{font-size:1.2rem;margin-bottom:1.3rem;font-weight:750}
+  .panel .row{display:flex;justify-content:space-between;align-items:center;padding:.85rem 0;border-bottom:1px solid rgba(255,255,255,.12);font-size:.98rem}
+  .panel .row:last-child{border-bottom:none}
+  .panel .tag{font-size:.72rem;font-weight:700;padding:.25rem .6rem;border-radius:999px;letter-spacing:.03em}
+  .tag.ok{background:rgba(47,162,122,.22);color:#8fe6c6}
+  .tag.warn{background:rgba(232,163,61,.22);color:#f4cf94}
+  .tag.due{background:rgba(217,93,93,.22);color:#f3b0b0}
+
+  /* Target market chips */
+  .chips{display:flex;flex-wrap:wrap;gap:.8rem;margin-top:1.6rem}
+  .chip{display:inline-flex;align-items:center;gap:.6rem;background:var(--white);border:1px solid var(--line);padding:.8rem 1.15rem;border-radius:999px;font-size:.98rem;font-weight:600;color:var(--navy);box-shadow:0 6px 16px rgba(11,37,69,.05)}
+  .chip .cd{width:9px;height:9px;border-radius:50%;background:var(--teal)}
+
+  /* Closing */
+  .slide.close{
+    background:
+      radial-gradient(1000px 700px at 80% -10%, rgba(29,111,184,.5), transparent 60%),
+      radial-gradient(900px 700px at 0% 120%, rgba(18,164,164,.4), transparent 55%),
+      linear-gradient(135deg,#0b2545 0%,#123a63 60%,#0e2a4a 100%);
+    color:#eaf3ff;justify-content:center;align-items:flex-start;
+  }
+  .close .lead{color:#c8ddf6}
+  .cta{
+    margin-top:2.4rem;display:inline-flex;align-items:center;gap:.7rem;
+    background:linear-gradient(135deg,var(--teal),var(--blue2));color:#fff;font-weight:750;
+    padding:1rem 1.8rem;border-radius:14px;font-size:1.05rem;box-shadow:0 14px 34px rgba(18,164,164,.35)
+  }
+  .contact{margin-top:2rem;font-size:.95rem;color:#a9c6e8}
+
+  /* Chrome: progress bar, counter, nav, footer */
+  .progress{position:fixed;top:0;left:0;height:4px;background:linear-gradient(90deg,var(--teal),var(--blue2));z-index:50;transition:width .45s ease;box-shadow:0 0 12px rgba(29,111,184,.5)}
+  .counter{position:fixed;bottom:22px;right:28px;z-index:50;font-size:.85rem;font-weight:700;color:var(--muted);background:rgba(255,255,255,.8);backdrop-filter:blur(6px);border:1px solid var(--line);padding:.4rem .8rem;border-radius:999px}
+  .cover .counter,.close .counter{}
+  .nav{position:fixed;bottom:20px;left:28px;z-index:50;display:flex;gap:.55rem}
+  .nav button{
+    width:40px;height:40px;border-radius:11px;border:1px solid var(--line);background:rgba(255,255,255,.85);
+    color:var(--navy);cursor:pointer;display:grid;place-items:center;transition:.2s;backdrop-filter:blur(6px)
+  }
+  .nav button:hover{background:var(--blue2);color:#fff;border-color:var(--blue2)}
+  .nav button:disabled{opacity:.35;cursor:not-allowed}
+  .nav svg{width:18px;height:18px}
+  .foot{position:absolute;left:7vw;bottom:3.4vh;font-size:.8rem;color:var(--muted);letter-spacing:.02em;display:flex;align-items:center;gap:.6rem}
+  .cover .foot,.close .foot{color:#9fbde0}
+  .foot .fdot{width:6px;height:6px;border-radius:50%;background:var(--teal)}
+  .hint{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);z-index:40;font-size:.78rem;color:var(--muted);opacity:.7;animation:fade 4s ease 3s forwards}
+  @keyframes fade{to{opacity:0}}
+
+  @media (max-width:820px){
+    .g3,.g4{grid-template-columns:repeat(2,1fr)}
+    .split{grid-template-columns:1fr;gap:1.6rem}
+    .timeline{grid-template-columns:repeat(2,1fr)}
+    .tl-track{display:none}
+    .stats{grid-template-columns:1fr}
+  }
+</style>
+</head>
+<body>
+<div class="progress" id="bar"></div>
+
+<div class="deck" id="deck">
+
+  <!-- 1. Cover -->
+  <section class="slide cover active">
+    <div class="brand">
+      <span class="logo">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+      </span>
+      <span class="brand-name">DocRenew</span>
+    </div>
+    <div class="eyebrow">Compliance Automation · SaaS</div>
+    <h1>Never miss a document<br>renewal again.</h1>
+    <p class="lead">An intelligent platform that tracks every employee document expiry and proactively notifies people and management — so organizations stay compliant, automatically.</p>
+    <div class="cover-tag">
+      <span><i class="dot"></i> Employee Document Renewal Management System</span>
+      <span><i class="dot"></i> Web &amp; Mobile</span>
+      <span><i class="dot"></i> Cloud SaaS</span>
+    </div>
+    <div class="foot"><i class="fdot"></i> Investor Presentation</div>
+  </section>
+
+  <!-- 2. Problem -->
+  <section class="slide">
+    <div class="slide-head">
+      <div class="eyebrow">The Problem</div>
+      <h2>Compliance documents expire quietly — until they cost you.</h2>
+      <p class="lead">Passports, driving licenses, work permits, visas, and certifications all have deadlines. Most companies still track them in spreadsheets and memory. Something always slips.</p>
+    </div>
+    <div class="body">
+      <div class="grid g3">
+        <div class="risk">
+          <span class="rx"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></span>
+          <div><h3>Legal &amp; regulatory risk</h3><p>An expired visa or permit can mean fines, failed audits, and a workforce that's no longer allowed to work.</p></div>
+        </div>
+        <div class="risk">
+          <span class="rx"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-3 3"/></svg></span>
+          <div><h3>Operational disruption</h3><p>A lapsed certification pulls a driver, nurse, or operator off the job — halting projects with no warning.</p></div>
+        </div>
+        <div class="risk">
+          <span class="rx"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg></span>
+          <div><h3>Manual, reactive tracking</h3><p>HR chases deadlines by hand across scattered files. It doesn't scale, and it fails silently.</p></div>
+        </div>
+      </div>
+      <div class="stats" style="margin-top:2rem">
+        <div class="stat"><div class="num">6+</div><div class="lbl">document types per employee to track</div></div>
+        <div class="stat"><div class="num">100s</div><div class="lbl">of expiry dates across a growing workforce</div></div>
+        <div class="stat"><div class="num">1</div><div class="lbl">missed renewal is all it takes to trigger risk</div></div>
+      </div>
+    </div>
+    <div class="foot"><i class="fdot"></i> DocRenew</div>
+  </section>
+
+  <!-- 3. Solution -->
+  <section class="slide">
+    <div class="slide-head">
+      <div class="eyebrow">The Solution</div>
+      <h2>One system that watches every deadline for you.</h2>
+    </div>
+    <div class="body">
+      <div class="split">
+        <div>
+          <p class="lead" style="margin-top:0">DocRenew is a centralized, secure repository for employee documents. It automatically tracks expiry dates and sends timely, escalating reminders to both the employee and the company — well before anything lapses.</p>
+          <ul class="bullets">
+            <li><span class="chk"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span><span><strong>Proactive, not reactive.</strong> Renewals start on time, automatically.</span></li>
+            <li><span class="chk"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span><span><strong>Everyone stays accountable.</strong> Employees and HR are notified in parallel.</span></li>
+            <li><span class="chk"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span><span><strong>Full visibility.</strong> A live dashboard of upcoming, expired, and renewed documents.</span></li>
+          </ul>
+        </div>
+        <div class="panel">
+          <h3>Live document status</h3>
+          <div class="row"><span>Work permit — A. Rahman</span><span class="tag warn">Renew in 28d</span></div>
+          <div class="row"><span>Driving license — S. Iyer</span><span class="tag ok">Renewed</span></div>
+          <div class="row"><span>Visa — M. Chen</span><span class="tag due">Expires in 5d</span></div>
+          <div class="row"><span>Safety cert — J. Okafor</span><span class="tag ok">Valid · 8 mo</span></div>
+          <div class="row"><span>Passport — L. Novak</span><span class="tag warn">Renew in 3 mo</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="foot"><i class="fdot"></i> DocRenew</div>
+  </section>
+
+  <!-- 4. Notification workflow / how it works -->
+  <section class="slide">
+    <div class="slide-head">
+      <div class="eyebrow">How It Works</div>
+      <h2>Escalating reminders on a proven timeline.</h2>
+      <p class="lead">Every document follows an automated notification schedule. Alerts intensify as the deadline approaches — and escalate to management if it passes.</p>
+    </div>
+    <div class="body">
+      <div class="timeline">
+        <div class="tl-track"></div>
+        <div class="tl g"><div class="pin"></div><div class="when">3 Months</div><div class="who">Employee &amp; Company</div><div class="why">Early reminder to begin the renewal process.</div></div>
+        <div class="tl g"><div class="pin"></div><div class="when">1 Month</div><div class="who">Employee &amp; Company</div><div class="why">Follow-up if renewal is still pending.</div></div>
+        <div class="tl a"><div class="pin"></div><div class="when">5 Days</div><div class="who">Employee &amp; Company</div><div class="why">Urgent alert to avoid expiration.</div></div>
+        <div class="tl r"><div class="pin"></div><div class="when">On Expiry</div><div class="who">Employee &amp; Company</div><div class="why">Document expired — immediate action required.</div></div>
+        <div class="tl r"><div class="pin"></div><div class="when">After Expiry</div><div class="who">Management</div><div class="why">Escalation for overdue renewals.</div></div>
+      </div>
+      <div class="grid g3" style="margin-top:2.2rem">
+        <div class="card"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-10 5L2 7"/></svg></div><h3>Email</h3><p>Formal renewal notices with document details and deadlines.</p></div>
+        <div class="card"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></div><h3>SMS</h3><p>Direct text alerts for time-critical, 5-day-out reminders.</p></div>
+        <div class="card"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="18" x2="12" y2="18"/></svg></div><h3>Mobile / App</h3><p>Push notifications so nothing gets buried in an inbox.</p></div>
+      </div>
+    </div>
+    <div class="foot"><i class="fdot"></i> DocRenew</div>
+  </section>
+
+  <!-- 5. Key features -->
+  <section class="slide">
+    <div class="slide-head">
+      <div class="eyebrow">Platform</div>
+      <h2>Everything HR needs in one place.</h2>
+    </div>
+    <div class="body">
+      <div class="grid g4">
+        <div class="card"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg></div><h3>Central repository</h3><p>Every employee document and detail in one secure home.</p></div>
+        <div class="card"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></div><h3>Secure storage</h3><p>Encrypted details and expiry dates, access-controlled.</p></div>
+        <div class="card"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg></div><h3>Automated reminders</h3><p>Timely alerts fire on schedule with zero manual effort.</p></div>
+        <div class="card"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/></svg></div><h3>Dual schedules</h3><p>Separate notification tracks for employees and HR.</p></div>
+        <div class="card"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9"/><rect x="14" y="3" width="7" height="5"/><rect x="14" y="12" width="7" height="9"/><rect x="3" y="16" width="7" height="5"/></svg></div><h3>Live dashboard</h3><p>Upcoming, expired, and renewed documents at a glance.</p></div>
+        <div class="card"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M16 13H8M16 17H8M10 9H8"/></svg></div><h3>Status &amp; reporting</h3><p>Track renewal progress and generate compliance reports.</p></div>
+        <div class="card"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 2 7l10 5 10-5-10-5z"/><path d="m2 17 10 5 10-5M2 12l10 5 10-5"/></svg></div><h3>Role-based access</h3><p>Admin, HR, Manager, and Employee — each sees the right view.</p></div>
+        <div class="card"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/></svg></div><h3>Configurable rules</h3><p>Custom reminder schedules per document and per team.</p></div>
+      </div>
+    </div>
+    <div class="foot"><i class="fdot"></i> DocRenew</div>
+  </section>
+
+  <!-- 6. Benefits -->
+  <section class="slide">
+    <div class="slide-head">
+      <div class="eyebrow">Why It Matters</div>
+      <h2>Measurable impact from day one.</h2>
+    </div>
+    <div class="body">
+      <div class="split">
+        <ul class="bullets">
+          <li><span class="chk"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span><span><strong>Prevents missed renewals</strong> before they become incidents.</span></li>
+          <li><span class="chk"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span><span><strong>Ensures legal &amp; regulatory compliance</strong> across the workforce.</span></li>
+          <li><span class="chk"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span><span><strong>Cuts manual tracking</strong> and frees HR from chasing deadlines.</span></li>
+          <li><span class="chk"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span><span><strong>Improves employee awareness</strong> and personal accountability.</span></li>
+          <li><span class="chk"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span><span><strong>Minimizes business disruption</strong> from expired documents.</span></li>
+        </ul>
+        <div class="grid" style="gap:1.15rem">
+          <div class="card" style="text-align:center"><div class="num" style="font-size:2.4rem;font-weight:850;color:var(--navy)">↓ 90%</div><p style="margin-top:.3rem">less manual follow-up for HR teams</p></div>
+          <div class="grid g2" style="gap:1.15rem">
+            <div class="card" style="text-align:center"><div class="num" style="font-size:1.9rem;font-weight:850;color:var(--teal)">0</div><p style="margin-top:.3rem">missed deadlines</p></div>
+            <div class="card" style="text-align:center"><div class="num" style="font-size:1.9rem;font-weight:850;color:var(--blue2)">24/7</div><p style="margin-top:.3rem">automated monitoring</p></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="foot"><i class="fdot"></i> DocRenew</div>
+  </section>
+
+  <!-- 7. Target market -->
+  <section class="slide">
+    <div class="slide-head">
+      <div class="eyebrow">Market</div>
+      <h2>Built for any organization managing compliance documents.</h2>
+      <p class="lead">Wherever a workforce carries permits, licenses, or certifications, DocRenew removes the risk of expiry.</p>
+    </div>
+    <div class="body">
+      <div class="chips">
+        <span class="chip"><i class="cd"></i> Corporate HR Departments</span>
+        <span class="chip"><i class="cd"></i> Manufacturing</span>
+        <span class="chip"><i class="cd"></i> Construction</span>
+        <span class="chip"><i class="cd"></i> Logistics &amp; Transportation</span>
+        <span class="chip"><i class="cd"></i> Healthcare Organizations</span>
+        <span class="chip"><i class="cd"></i> Government Agencies</span>
+        <span class="chip"><i class="cd"></i> Any compliance-driven employer</span>
+      </div>
+      <div class="grid g3" style="margin-top:2.4rem">
+        <div class="card"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18M5 21V7l8-4v18M19 21V11l-6-4"/></svg></div><h3>High-compliance industries</h3><p>Sectors where expired credentials directly stop work and invite penalties.</p></div>
+        <div class="card"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg></div><h3>Scaling workforces</h3><p>Growing headcount multiplies documents — exactly where manual tracking breaks.</p></div>
+        <div class="card"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg></div><h3>Multi-site operations</h3><p>Distributed teams and locations kept compliant from one central platform.</p></div>
+      </div>
+    </div>
+    <div class="foot"><i class="fdot"></i> DocRenew</div>
+  </section>
+
+  <!-- 8. Technology vision -->
+  <section class="slide">
+    <div class="slide-head">
+      <div class="eyebrow">Technology Vision</div>
+      <h2>A cloud-based SaaS platform, web and mobile.</h2>
+    </div>
+    <div class="body">
+      <div class="grid g2" style="gap:1.4rem">
+        <div class="card"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"/></svg></div><h3>Cloud-native SaaS</h3><p>Accessible anywhere, always up to date, with no infrastructure for customers to maintain.</p></div>
+        <div class="card"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4z"/></svg></div><h3>Configurable by design</h3><p>Organizations set custom reminder schedules and manage profiles their own way.</p></div>
+        <div class="card"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg></div><h3>Web &amp; mobile access</h3><p>Manage documents and receive notifications from the desktop or on the go.</p></div>
+        <div class="card"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M9 15l2 2 4-4"/></svg></div><h3>Automated compliance reporting</h3><p>Generate audit-ready reports on demand — proof of compliance in a click.</p></div>
+      </div>
+    </div>
+    <div class="foot"><i class="fdot"></i> DocRenew</div>
+  </section>
+
+  <!-- 9. Closing -->
+  <section class="slide close">
+    <div class="eyebrow">The Vision</div>
+    <h2 style="color:#eaf3ff;max-width:20ch">Compliance that manages itself.</h2>
+    <p class="lead">DocRenew is an intelligent, automated document renewal solution that keeps organizations and employees compliant — ensuring every critical document is renewed on time through proactive notifications and centralized tracking.</p>
+    <div class="cta">
+      Let's keep your workforce compliant
+      <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" style="width:20px;height:20px"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+    </div>
+    <div class="contact">DocRenew · Employee Document Renewal Management System &nbsp;·&nbsp; contact@zamorinstech.com</div>
+    <div class="foot"><i class="fdot"></i> Thank you</div>
+  </section>
+
+</div>
+
+<div class="counter" id="counter">01 / 09</div>
+<div class="nav">
+  <button id="prev" aria-label="Previous slide"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg></button>
+  <button id="next" aria-label="Next slide"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg></button>
+</div>
+<div class="hint">Use ← → arrow keys or click to navigate</div>
+
+<script>
+  const slides=[...document.querySelectorAll('.slide')];
+  const bar=document.getElementById('bar');
+  const counter=document.getElementById('counter');
+  const prev=document.getElementById('prev');
+  const next=document.getElementById('next');
+  let i=0;
+  const pad=n=>String(n).padStart(2,'0');
+  function show(n){
+    i=Math.max(0,Math.min(slides.length-1,n));
+    slides.forEach((s,x)=>s.classList.toggle('active',x===i));
+    bar.style.width=((i+1)/slides.length*100)+'%';
+    counter.textContent=pad(i+1)+' / '+pad(slides.length);
+    prev.disabled=i===0;next.disabled=i===slides.length-1;
+  }
+  next.onclick=()=>show(i+1);
+  prev.onclick=()=>show(i-1);
+  document.addEventListener('keydown',e=>{
+    if(e.key==='ArrowRight'||e.key==='PageDown'||e.key===' ')show(i+1);
+    if(e.key==='ArrowLeft'||e.key==='PageUp')show(i-1);
+    if(e.key==='Home')show(0);
+    if(e.key==='End')show(slides.length-1);
+  });
+  document.getElementById('deck').addEventListener('click',e=>{
+    if(e.target.closest('.nav')||e.target.closest('.cta'))return;
+    const x=e.clientX/window.innerWidth;
+    if(x>0.62)show(i+1);else if(x<0.2)show(i-1);
+  });
+  show(0);
+</script>
+</body>
+</html>
