@@ -1,0 +1,663 @@
+<title>DocRenew Screens</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@700;800&family=Inter:wght@400;500;600;700&display=swap">
+<style>
+:root{
+  --bg:#f3f7fb; --surface:#ffffff; --surface-2:#f8fafd; --line:#dfe7f0; --ink:#0f2033; --muted:#5b6b7d;
+  --navy:#0b2545; --blue:#1d6fb8; --teal:#12a4a4; --sky:#eaf2fb;
+  --ok:#1f7a56; --ok-bg:#e1f3ea;
+  --warn:#9a6a12; --warn-bg:#fbeed9;
+  --urgent:#b4530f; --urgent-bg:#fde3d1;
+  --crit:#a23b3b; --crit-bg:#f8e0e0;
+  --idle:#5b6b7d; --idle-bg:#eceff3;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0a1626; --surface:#101f34; --surface-2:#0d1a2c; --line:#213a52; --ink:#e8f0fa; --muted:#93a7bf;
+    --navy:#d7e6f8; --blue:#6cb0ec; --teal:#52dada; --sky:#122a44;
+    --ok:#86e4bc; --ok-bg:#113526;
+    --warn:#f3cd82; --warn-bg:#3a2d10;
+    --urgent:#f5a872; --urgent-bg:#3a2411;
+    --crit:#f3a3a3; --crit-bg:#3a1818;
+    --idle:#a9b8ca; --idle-bg:#182536;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0a1626; --surface:#101f34; --surface-2:#0d1a2c; --line:#213a52; --ink:#e8f0fa; --muted:#93a7bf;
+  --navy:#d7e6f8; --blue:#6cb0ec; --teal:#52dada; --sky:#122a44;
+  --ok:#86e4bc; --ok-bg:#113526;
+  --warn:#f3cd82; --warn-bg:#3a2d10;
+  --urgent:#f5a872; --urgent-bg:#3a2411;
+  --crit:#f3a3a3; --crit-bg:#3a1818;
+  --idle:#a9b8ca; --idle-bg:#182536;
+  color-scheme: dark;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:'Inter',-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
+h1,h2,h3,.brand-name{font-family:'Manrope',Inter,sans-serif}
+button{font-family:inherit}
+
+/* ---- Top bar ---- */
+.topbar{
+  display:flex;align-items:center;gap:18px;padding:12px 20px;
+  background:linear-gradient(135deg,var(--navy),#123a63 70%);color:#eaf3ff;
+  position:sticky;top:0;z-index:20;flex-wrap:wrap;
+}
+.brand{display:flex;align-items:center;gap:10px;margin-right:8px}
+.brand .logo{width:30px;height:30px;border-radius:9px;background:linear-gradient(135deg,var(--teal),var(--blue));display:grid;place-items:center;flex:0 0 auto}
+.brand .logo svg{width:17px;height:17px}
+.brand-name{font-weight:800;font-size:16px;letter-spacing:-.01em}
+.roletabs{display:flex;gap:6px;flex-wrap:wrap}
+.roletab{
+  border:1px solid rgba(255,255,255,.18);background:rgba(255,255,255,.06);color:#cfe0f5;
+  padding:7px 14px;border-radius:999px;font-size:12.5px;font-weight:700;cursor:pointer;transition:.15s;
+  display:flex;align-items:center;gap:7px;
+}
+.roletab:hover{background:rgba(255,255,255,.14)}
+.roletab.active{background:linear-gradient(135deg,var(--teal),var(--blue));color:#fff;border-color:transparent}
+.topbar .spacer{flex:1}
+.viewer{font-size:12px;color:#9fc0e4;display:flex;align-items:center;gap:8px}
+.viewer .avatar{width:26px;height:26px;border-radius:50%;background:var(--teal);color:#06241f;display:grid;place-items:center;font-weight:800;font-size:11px}
+
+/* ---- Shell ---- */
+.shell{display:flex;min-height:calc(100vh - 54px)}
+.sidebar{
+  width:230px;flex:0 0 auto;background:var(--surface);border-right:1px solid var(--line);
+  padding:18px 12px;display:flex;flex-direction:column;gap:2px;
+}
+.sidebar .label{font-size:10.5px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);padding:6px 10px 10px}
+.navitem{
+  display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:9px;cursor:pointer;
+  font-size:13.5px;font-weight:600;color:var(--ink);border:1px solid transparent;
+}
+.navitem:hover{background:var(--sky)}
+.navitem.active{background:var(--sky);border-color:var(--line);color:var(--navy)}
+.navitem .dot{width:6px;height:6px;border-radius:50%;background:var(--line);flex:0 0 auto}
+.navitem.active .dot{background:var(--teal)}
+.main{flex:1;padding:26px 30px 60px;max-width:1180px}
+.screen-head{margin-bottom:20px}
+.eyebrow{font-size:11px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--teal);margin-bottom:6px}
+.screen-head h1{font-size:22px;font-weight:800;color:var(--navy);margin:0 0 4px;letter-spacing:-.01em}
+.screen-head p{font-size:13.5px;color:var(--muted);margin:0;max-width:62ch}
+
+/* ---- Shared components ---- */
+.card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:18px 20px}
+.tiles{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:22px}
+@media (max-width:900px){.tiles{grid-template-columns:repeat(2,1fr)}}
+.tile{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:14px 16px}
+.tile .n{font-family:'Manrope',sans-serif;font-size:26px;font-weight:800;color:var(--navy);font-variant-numeric:tabular-nums}
+.tile .l{font-size:11.5px;color:var(--muted);margin-top:2px}
+.tile.ok .n{color:var(--ok)} .tile.warn .n{color:var(--warn)} .tile.urgent .n{color:var(--urgent)} .tile.crit .n{color:var(--crit)}
+
+.toolbar{display:flex;gap:10px;align-items:center;margin-bottom:14px;flex-wrap:wrap}
+.input,.select{border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:9px;padding:8px 12px;font-size:13px;font-family:inherit}
+.btn{border:none;border-radius:9px;padding:8px 16px;font-size:13px;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:7px}
+.btn.primary{background:linear-gradient(135deg,var(--teal),var(--blue));color:#fff}
+.btn.ghost{background:var(--sky);color:var(--navy)}
+.btn.outline{background:transparent;border:1px solid var(--line);color:var(--ink)}
+.btn.sm{padding:5px 11px;font-size:12px}
+
+table{width:100%;border-collapse:collapse;font-size:13px}
+th,td{text-align:left;padding:10px 12px;border-bottom:1px solid var(--line)}
+th{font-size:10.5px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:800;background:var(--surface-2)}
+tr:last-child td{border-bottom:none}
+.tbl-card{background:var(--surface);border:1px solid var(--line);border-radius:14px;overflow:hidden}
+
+.pill{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:700;padding:4px 10px;border-radius:999px;white-space:nowrap}
+.pill.ok{background:var(--ok-bg);color:var(--ok)}
+.pill.warn{background:var(--warn-bg);color:var(--warn)}
+.pill.urgent{background:var(--urgent-bg);color:var(--urgent)}
+.pill.crit{background:var(--crit-bg);color:var(--crit)}
+.pill.idle{background:var(--idle-bg);color:var(--idle)}
+.pill .dotm{width:6px;height:6px;border-radius:50%;background:currentColor}
+
+.formgrid{display:grid;grid-template-columns:1fr 1fr;gap:14px 18px;margin-top:4px}
+.formgrid.g1{grid-template-columns:1fr}
+@media (max-width:700px){.formgrid{grid-template-columns:1fr}}
+.field label{display:block;font-size:11.5px;font-weight:700;color:var(--muted);margin-bottom:6px;text-transform:uppercase;letter-spacing:.04em}
+.field input,.field select,.field textarea{
+  width:100%;border:1px solid var(--line);background:var(--surface-2);color:var(--ink);
+  border-radius:9px;padding:9px 12px;font-size:13.5px;font-family:inherit
+}
+.field textarea{resize:vertical;min-height:70px}
+
+.doccard{display:flex;gap:14px;align-items:flex-start;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:16px 18px}
+.doccard .ic{width:40px;height:40px;border-radius:10px;background:var(--sky);color:var(--blue);display:grid;place-items:center;flex:0 0 auto}
+.doccard .ic svg{width:20px;height:20px}
+.doccard h3{font-size:14.5px;margin:0 0 3px;color:var(--navy)}
+.doccard .meta{font-size:12px;color:var(--muted)}
+.doccardgrid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}
+@media (max-width:760px){.doccardgrid{grid-template-columns:1fr}}
+
+.toggle{display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--line)}
+.toggle:last-child{border-bottom:none}
+.toggle .t{font-size:13.5px;font-weight:600}
+.toggle .d{font-size:12px;color:var(--muted);margin-top:2px}
+.switch{width:38px;height:22px;border-radius:999px;background:var(--line);position:relative;cursor:pointer;flex:0 0 auto}
+.switch.on{background:var(--teal)}
+.switch i{position:absolute;top:2px;left:2px;width:18px;height:18px;border-radius:50%;background:#fff;transition:.15s}
+.switch.on i{left:18px}
+
+.steps{display:flex;gap:0;margin-bottom:22px}
+.step{flex:1;text-align:center;position:relative;padding-bottom:12px;font-size:12px;font-weight:700;color:var(--muted)}
+.step::before{content:"";position:absolute;bottom:0;left:0;right:0;height:3px;background:var(--line);border-radius:3px}
+.step.done::before{background:var(--teal)}
+.step.active{color:var(--navy)}
+.step.active::before{background:var(--blue)}
+
+.avatarname{display:flex;align-items:center;gap:9px}
+.avatarname .av{width:28px;height:28px;border-radius:50%;background:var(--sky);color:var(--navy);display:grid;place-items:center;font-size:11px;font-weight:800;flex:0 0 auto}
+
+.callout{border-left:3px solid var(--teal);background:var(--sky);border-radius:10px;padding:12px 16px;font-size:12.5px;color:var(--ink);margin-bottom:16px}
+.callout.warn{border-left-color:var(--urgent);background:var(--urgent-bg)}
+.sectiongap{margin-top:26px}
+.hint{font-size:11.5px;color:var(--muted);margin-top:10px}
+
+/* ---- Login ---- */
+.loginwrap{
+  min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;
+  background:
+    radial-gradient(900px 500px at 88% -10%, rgba(29,111,184,.35), transparent 60%),
+    radial-gradient(700px 500px at -10% 110%, rgba(18,164,164,.28), transparent 55%),
+    linear-gradient(135deg,var(--navy),#123a63 70%);
+}
+.loginbrand{display:flex;align-items:center;gap:10px;justify-content:center;margin-bottom:26px}
+.loginbrand .logo{width:34px;height:34px;border-radius:10px;background:linear-gradient(135deg,var(--teal),var(--blue));display:grid;place-items:center}
+.loginbrand .logo svg{width:19px;height:19px}
+.loginbrand span{font-family:'Manrope',sans-serif;font-weight:800;font-size:19px;color:#fff}
+.logincard{width:100%;max-width:380px;background:var(--surface);border-radius:18px;padding:34px 32px;box-shadow:0 30px 80px rgba(5,15,30,.35)}
+.logincard h1{font-size:19px;color:var(--navy);margin:0 0 4px;font-weight:800}
+.logincard p.sub{font-size:12.5px;color:var(--muted);margin:0 0 22px}
+.loginfield{margin-bottom:14px}
+.loginfield label{display:block;font-size:11.5px;font-weight:700;color:var(--muted);margin-bottom:6px;text-transform:uppercase;letter-spacing:.04em}
+.loginfield input{width:100%;border:1px solid var(--line);background:var(--surface-2);color:var(--ink);border-radius:9px;padding:10px 12px;font-size:13.5px;font-family:inherit}
+.loginrow{display:flex;justify-content:space-between;align-items:center;margin:4px 0 18px;font-size:12px}
+.loginrow a{color:var(--blue);text-decoration:none;font-weight:600}
+.loginbtn{width:100%;border:none;border-radius:9px;padding:11px;font-size:13.5px;font-weight:700;cursor:pointer;background:linear-gradient(135deg,var(--teal),var(--blue));color:#fff}
+.logindivider{display:flex;align-items:center;gap:10px;margin:22px 0 16px;font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+.logindivider::before,.logindivider::after{content:"";flex:1;height:1px;background:var(--line)}
+.demorow{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
+.demobtn{border:1px solid var(--line);background:var(--surface-2);color:var(--ink);border-radius:9px;padding:9px 8px;font-size:12px;font-weight:700;cursor:pointer;text-align:left}
+.demobtn:hover{border-color:var(--blue);background:var(--sky)}
+.demobtn .r{display:block;font-size:10px;font-weight:800;color:var(--teal);text-transform:uppercase;letter-spacing:.04em;margin-bottom:1px}
+.loginfoot{text-align:center;font-size:11px;color:#9fc0e4;margin-top:20px}
+.signout{background:none;border:1px solid rgba(255,255,255,.25);color:#cfe0f5;border-radius:999px;padding:5px 12px;font-size:11.5px;font-weight:700;cursor:pointer;margin-left:8px}
+.signout:hover{background:rgba(255,255,255,.12)}
+</style>
+
+<div id="app"></div>
+
+<script>
+(function(){
+
+  /* ---------------- Sample data (shared across screens) ---------------- */
+  var PEOPLE = [
+    {name:"A. Rahman", dept:"Operations", mgr:"S. Iyer", email:"a.rahman@acmeco.com"},
+    {name:"S. Iyer", dept:"Logistics", mgr:"—", email:"s.iyer@acmeco.com"},
+    {name:"M. Chen", dept:"Engineering", mgr:"J. Okafor", email:"m.chen@acmeco.com"},
+    {name:"J. Okafor", dept:"Safety", mgr:"—", email:"j.okafor@acmeco.com"},
+    {name:"L. Novak", dept:"Finance", mgr:"S. Iyer", email:"l.novak@acmeco.com"},
+    {name:"P. Dsouza", dept:"Operations", mgr:"S. Iyer", email:"p.dsouza@acmeco.com"},
+  ];
+
+  var DOCS = [
+    {employee:"A. Rahman", type:"Work Permit", expiry:"08 Nov 2026", days:28, status:"warn", label:"Renew in 28d"},
+    {employee:"S. Iyer", type:"Driving License", expiry:"02 Oct 2026", days:-11, status:"ok", label:"Renewed"},
+    {employee:"M. Chen", type:"Visa", expiry:"18 Oct 2026", days:5, status:"crit", label:"Expires in 5d"},
+    {employee:"J. Okafor", type:"Safety Certification", expiry:"14 Jun 2027", days:244, status:"ok", label:"Valid · 8 mo"},
+    {employee:"L. Novak", type:"Passport", expiry:"20 Jan 2027", days:99, status:"warn", label:"Renew in 3 mo"},
+    {employee:"P. Dsouza", type:"Work Permit", expiry:"05 Oct 2026", days:-8, status:"urgent", label:"Expired 8d ago"},
+    {employee:"A. Rahman", type:"Passport", expiry:"11 Dec 2026", days:59, status:"warn", label:"Renew in 59d"},
+    {employee:"M. Chen", type:"Driving License", expiry:"02 Mar 2027", days:140, status:"ok", label:"Valid"},
+    {employee:"M. Chen", type:"Warranty", expiry:"15 Jan 2027", days:94, status:"warn", label:"Renew in 3 mo", itemLabel:"Company Laptop — Dell Latitude"},
+    {employee:"S. Iyer", type:"Vehicle Maintenance", expiry:"25 Oct 2026", days:12, status:"warn", label:"Service due in 12d", itemLabel:"Company Car — KA01AB1234"},
+    {employee:"—", type:"AMC", expiry:"30 Nov 2026", days:46, status:"warn", label:"Renew in 46d", itemLabel:"Office AC Units — Blue Star"},
+    {employee:"—", type:"Bill", expiry:"20 Oct 2026", days:6, status:"crit", label:"Due in 6d", itemLabel:"Office Internet — Leased Line"},
+    {employee:"—", type:"Other Notification", expiry:"01 Dec 2026", days:47, status:"ok", label:"Valid · 47d", itemLabel:"Office Lease Renewal"},
+  ];
+
+  function statusLabel(s){
+    return {ok:"Valid", warn:"Expiring Soon", urgent:"Expired", crit:"Expiring Urgent", idle:"—"}[s] || s;
+  }
+  function pill(status, text){
+    return '<span class="pill '+status+'"><span class="dotm"></span>'+(text||statusLabel(status))+'</span>';
+  }
+  function avatar(name){
+    var initials = name.split(" ").map(function(p){return p[0]}).join("").slice(0,2).toUpperCase();
+    return '<span class="av">'+initials+'</span>';
+  }
+  function icon(path){
+    return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">'+path+'</svg>';
+  }
+  var ICONS = {
+    doc: '<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/>',
+    passport: '<rect x="4" y="3" width="16" height="18" rx="2"/><circle cx="12" cy="10" r="3"/><path d="M8 17h8"/>',
+    visa: '<path d="M21 11V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h7"/><path d="M16 17l2 2 4-4"/>',
+    permit: '<path d="M3 7h18M3 12h18M3 17h10"/>',
+    license: '<rect x="2" y="5" width="20" height="14" rx="2"/><circle cx="8" cy="12" r="2"/><path d="M14 10h4M14 14h4"/>',
+    cert: '<circle cx="12" cy="8" r="5"/><path d="M8.5 13 7 22l5-3 5 3-1.5-9"/>',
+    warranty: '<path d="M12 2l8 4v6c0 5-3.5 8.5-8 10-4.5-1.5-8-5-8-10V6z"/><path d="M9 12l2 2 4-4"/>',
+    vehicle: '<path d="M5 17h14M5 17a2 2 0 1 1-4 0 2 2 0 0 1 4 0zm14 0a2 2 0 1 0 4 0 2 2 0 0 0-4 0z" transform="translate(0 0)"/><path d="M3 17V11l2-5h14l2 5v6"/><circle cx="7" cy="17" r="2"/><circle cx="17" cy="17" r="2"/>',
+    bill: '<path d="M4 2h16v20l-3-2-3 2-3-2-3 2-3-2-1 1z"/><path d="M8 7h8M8 11h8M8 15h5"/>',
+    amc: '<path d="M14.7 6.3a1 1 0 0 0 1.4 1.4l3.3-3.3a4 4 0 0 1-5.6 5.6L4 19.9V22h2.1l9.8-9.8a4 4 0 0 1 5.6-5.6l-3.3 3.3a1 1 0 0 0 1.4 1.4" />',
+    bell: '<path d="M18 8a6 6 0 1 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/>',
+  };
+  function docIcon(type){
+    if(type.indexOf("Passport")>-1) return ICONS.passport;
+    if(type.indexOf("Visa")>-1) return ICONS.visa;
+    if(type.indexOf("Permit")>-1) return ICONS.permit;
+    if(type.indexOf("License")>-1) return ICONS.license;
+    if(type.indexOf("Warranty")>-1) return ICONS.warranty;
+    if(type.indexOf("Vehicle")>-1) return ICONS.vehicle;
+    if(type.indexOf("Bill")>-1) return ICONS.bill;
+    if(type.indexOf("AMC")>-1) return ICONS.amc;
+    if(type.indexOf("Other")>-1) return ICONS.bell;
+    return ICONS.cert;
+  }
+
+  /* ---------------- Role / screen registry ---------------- */
+  var ROLES = [
+    {
+      id:"admin", label:"Admin", viewer:{name:"R. Fernandes", role:"Admin"},
+      screens:[
+        {id:"settings", label:"Tenant Settings", render:renderAdminSettings},
+        {id:"doctypes", label:"Document Types & Rules", render:renderAdminDocTypes},
+        {id:"users", label:"Users & Roles", render:renderAdminUsers},
+        {id:"audit", label:"Audit Log", render:renderAdminAudit},
+      ]
+    },
+    {
+      id:"hr", label:"HR", viewer:{name:"Latha Kumar", role:"HR"},
+      screens:[
+        {id:"dashboard", label:"Compliance Dashboard", render:renderHrDashboard},
+        {id:"doclist", label:"Document List", render:renderHrDocList},
+        {id:"profiles", label:"Employee Profiles", render:renderHrProfiles},
+        {id:"reports", label:"Reports", render:renderHrReports},
+      ]
+    },
+    {
+      id:"manager", label:"Manager", viewer:{name:"S. Iyer", role:"Manager"},
+      screens:[
+        {id:"teamdash", label:"Team Dashboard", render:renderMgrDashboard},
+        {id:"teamdocs", label:"Team Documents", render:renderMgrDocs},
+        {id:"escalations", label:"Escalations", render:renderMgrEscalations},
+      ]
+    },
+    {
+      id:"employee", label:"Employee", viewer:{name:"M. Chen", role:"Employee"},
+      screens:[
+        {id:"mydocs", label:"My Documents", render:renderEmpDocs},
+        {id:"profile", label:"My Profile", render:renderEmpProfile},
+        {id:"renew", label:"Renew a Document", render:renderEmpRenew},
+      ]
+    },
+  ];
+
+  var state = { view: "login", role: "hr", screen: "dashboard" };
+
+  /* ---------------- Render: Admin screens ---------------- */
+  function renderAdminSettings(){
+    return head("Tenant Settings","ADMIN · CONFIGURATION","Branding, timezone, and defaults for Acme Manufacturing Co.'s DocRenew workspace.") +
+    '<div class="card"><div class="formgrid">' +
+      field("Organization name","Acme Manufacturing Co.") +
+      field("Timezone","Asia/Kolkata (UTC+05:30)","select") +
+      field("Date format","DD MMM YYYY","select") +
+      field("Default scan interval","15 minutes","select") +
+      field("Default scan window","± 7 minutes","select") +
+      field("Primary brand color","#0B2545") +
+    '</div>' +
+    '<div class="sectiongap"><button class="btn primary">Save changes</button> <button class="btn outline" style="margin-left:8px">Cancel</button></div>' +
+    '</div>';
+  }
+
+  function renderAdminDocTypes(){
+    var types = [
+      ["Passport","Employee Document","1","Active"], ["Visa","Employee Document","2","Active"], ["Work Permit","Employee Document","3","Active"],
+      ["Driving License","Employee Document","4","Active"], ["Certification","Employee Document","5","Active"], ["Health Card","Employee Document","6","Retired"],
+      ["Warranty","Extended Item","7","Active"], ["Vehicle Maintenance","Extended Item","8","Active"],
+      ["Bill","Extended Item","9","Active"], ["AMC","Extended Item","10","Active"], ["Other Notification","Extended Item","11","Active"],
+    ];
+    var rows = types.map(function(t){
+      return '<tr><td>'+t[0]+'</td><td>'+pill(t[1]==="Employee Document"?"idle":"ok", t[1])+'</td><td>'+t[2]+'</td><td>'+pill(t[3]==="Active"?"ok":"idle", t[3])+'</td>' +
+        '<td><button class="btn outline sm">Edit</button> <button class="btn outline sm">'+(t[3]==="Active"?"Retire":"Restore")+'</button></td></tr>';
+    }).join("");
+    var stages = [
+      ["Early reminder","90 days before","Email","Employee & HR"],
+      ["Follow-up","30 days before","Email","Employee & HR"],
+      ["Urgent","5 days before","Email + SMS","Employee & HR"],
+      ["Expiry","On expiry date","Email + SMS + Push","Employee & HR"],
+      ["Escalation","Every 7 days after expiry","Email + Push","Management"],
+    ];
+    var stageRows = stages.map(function(s){
+      return '<tr><td>'+s[0]+'</td><td>'+s[1]+'</td><td>'+s[2]+'</td><td>'+s[3]+'</td><td><button class="btn outline sm">Edit</button></td></tr>';
+    }).join("");
+    return head("Document Types & Reminder Rules","ADMIN · CONFIGURATION","Define the item categories this tenant tracks — employee documents as well as extended items like warranties, vehicle maintenance, bills, and AMCs — and the escalating reminder timeline applied by default.") +
+    '<div class="toolbar"><button class="btn primary">+ Add item type</button></div>' +
+    '<div class="tbl-card"><table><thead><tr><th>Type</th><th>Category</th><th>Order</th><th>Status</th><th>Actions</th></tr></thead><tbody>'+rows+'</tbody></table></div>' +
+    '<div class="sectiongap"></div>' +
+    '<h3 style="color:var(--navy);font-size:15px;margin:0 0 10px">Default reminder schedule</h3>' +
+    '<div class="tbl-card"><table><thead><tr><th>Stage</th><th>Offset</th><th>Channels</th><th>Recipients</th><th></th></tr></thead><tbody>'+stageRows+'</tbody></table></div>';
+  }
+
+  function renderAdminUsers(){
+    var users = [
+      ["R. Fernandes","r.fernandes@acmeco.com","Admin","Active"],
+      ["Latha Kumar","latha@acmeco.com","HR","Active"],
+      ["S. Iyer","s.iyer@acmeco.com","Manager","Active"],
+      ["M. Chen","m.chen@acmeco.com","Employee","Active"],
+      ["A. Rahman","a.rahman@acmeco.com","Employee","Invited"],
+      ["P. Dsouza","p.dsouza@acmeco.com","Employee","Suspended"],
+    ];
+    var rows = users.map(function(u){
+      var statusTone = u[3]==="Active"?"ok":(u[3]==="Invited"?"warn":"crit");
+      return '<tr><td><div class="avatarname">'+avatar(u[0])+'<span>'+u[0]+'</span></div></td><td>'+u[1]+'</td><td>'+pill("idle",u[2])+'</td><td>'+pill(statusTone,u[3])+'</td>' +
+        '<td><button class="btn outline sm">Edit role</button></td></tr>';
+    }).join("");
+    return head("Users & Roles","ADMIN · ACCESS CONTROL","Invite teammates and control who can see and edit what, across Admin, HR, Manager, and Employee roles.") +
+    '<div class="toolbar"><input class="input" placeholder="Search users…" style="flex:1;max-width:260px"><button class="btn primary" style="margin-left:auto">+ Invite user</button></div>' +
+    '<div class="tbl-card"><table><thead><tr><th>Name</th><th>Email</th><th>Role</th><th>Status</th><th>Actions</th></tr></thead><tbody>'+rows+'</tbody></table></div>';
+  }
+
+  function renderAdminAudit(){
+    var entries = [
+      ["13 Oct 2026, 09:14","R. Fernandes","config.update","Updated default reminder schedule"],
+      ["12 Oct 2026, 16:02","Latha Kumar","document.viewNumber","Viewed full document number — M. Chen / Visa"],
+      ["12 Oct 2026, 11:47","R. Fernandes","user.suspend","Suspended user account — P. Dsouza"],
+      ["10 Oct 2026, 08:30","Latha Kumar","document.renew","Renewed document — S. Iyer / Driving License"],
+      ["08 Oct 2026, 14:55","R. Fernandes","config.update","Added document type — Health Card"],
+    ];
+    var rows = entries.map(function(e){
+      return '<tr><td>'+e[0]+'</td><td>'+e[1]+'</td><td><code style="font-size:11.5px;background:var(--surface-2);padding:2px 6px;border-radius:5px">'+e[2]+'</code></td><td>'+e[3]+'</td></tr>';
+    }).join("");
+    return head("Audit Log","ADMIN · COMPLIANCE","A record of sensitive actions — configuration changes, document number reveals, and account changes — retained for regulatory review.") +
+    '<div class="tbl-card"><table><thead><tr><th>Timestamp</th><th>Actor</th><th>Action</th><th>Details</th></tr></thead><tbody>'+rows+'</tbody></table></div>';
+  }
+
+  /* ---------------- Render: HR screens ---------------- */
+  function dashTiles(counts){
+    return '<div class="tiles">' +
+      '<div class="tile ok"><div class="n">'+counts.valid+'</div><div class="l">Valid</div></div>' +
+      '<div class="tile warn"><div class="n">'+counts.soon+'</div><div class="l">Expiring soon</div></div>' +
+      '<div class="tile crit"><div class="n">'+counts.urgent5+'</div><div class="l">Expiring ≤5 days</div></div>' +
+      '<div class="tile urgent"><div class="n">'+counts.expired+'</div><div class="l">Expired</div></div>' +
+      '<div class="tile"><div class="n">'+counts.renewed+'</div><div class="l">Renewed (30d)</div></div>' +
+    '</div>';
+  }
+  function docTable(rows, scoped){
+    var trs = rows.map(function(d){
+      var who = d.employee === "—"
+        ? '<div class="avatarname">'+avatar("Org")+'<span>'+(d.itemLabel || "Organization")+'</span></div>'
+        : '<div class="avatarname">'+avatar(d.employee)+'<span>'+d.employee+(d.itemLabel ? ' <span style="color:var(--muted);font-weight:400">· '+d.itemLabel+'</span>' : '')+'</span></div>';
+      return '<tr><td>'+who+'</td>' +
+        '<td>'+d.type+'</td><td>'+d.expiry+'</td><td>'+pill(d.status, d.label)+'</td>' +
+        '<td><button class="btn outline sm">View</button> <button class="btn ghost sm">Renew</button></td></tr>';
+    }).join("");
+    return '<div class="tbl-card"><table><thead><tr><th>Employee / Item</th><th>Type</th><th>Expiry / Due</th><th>Status</th><th>Actions</th></tr></thead><tbody>'+trs+'</tbody></table></div>';
+  }
+
+  function renderHrDashboard(){
+    return head("Compliance Dashboard","HR · OVERVIEW","Every tracked document across the organization, at a glance — filter, sort, or act in bulk.") +
+    dashTiles({valid:4, soon:6, urgent5:2, expired:1, renewed:1}) +
+    '<div class="toolbar">' +
+      '<select class="select"><option>All statuses</option><option>Expiring soon</option><option>Expired</option></select>' +
+      '<select class="select"><option>All types</option><option>Passport</option><option>Visa</option><option>Warranty</option><option>Vehicle Maintenance</option><option>Bill</option><option>AMC</option><option>Other Notification</option></select>' +
+      '<input class="input" placeholder="Search employee or item…">' +
+      '<button class="btn outline" style="margin-left:auto">Export</button>' +
+      '<button class="btn primary">Send reminder</button>' +
+    '</div>' +
+    docTable(DOCS);
+  }
+
+  function renderHrDocList(){
+    return head("Document List","HR · DOCUMENTS","Full inventory of employee documents, with a detail view for the selected record.") +
+    '<div style="display:grid;grid-template-columns:1.4fr 1fr;gap:20px" class="sm-stack">' +
+      '<div>' + docTable(DOCS) + '</div>' +
+      '<div class="card">' +
+        '<div class="eyebrow">Document detail</div>' +
+        '<h3 style="margin:0 0 4px;color:var(--navy);font-size:16px">Work Permit — A. Rahman</h3>' +
+        '<p style="color:var(--muted);font-size:13px;margin:0 0 14px">Operations · Employee ID AC-0142</p>' +
+        '<div class="formgrid g1">' +
+          field("Document number","WP-884213 ••••", "readonly") +
+          field("Issue date","12 Nov 2023", "readonly") +
+          field("Expiry date","08 Nov 2026", "readonly") +
+        '</div>' +
+        pill("warn","Renew in 28 days") +
+        '<div class="sectiongap"><button class="btn primary">Mark as renewed</button> <button class="btn outline" style="margin-left:8px">Download attachment</button></div>' +
+      '</div>' +
+    '</div>';
+  }
+
+  function renderHrProfiles(){
+    var rows = PEOPLE.map(function(p){
+      return '<tr><td><div class="avatarname">'+avatar(p.name)+'<span>'+p.name+'</span></div></td><td>'+p.dept+'</td><td>'+p.mgr+'</td><td>'+p.email+'</td>' +
+        '<td>'+pill("ok","Linked")+'</td><td><button class="btn outline sm">Edit</button></td></tr>';
+    }).join("");
+    return head("Employee Profiles","HR · PEOPLE","Create and manage the employee records that documents are tracked against.") +
+    '<div class="toolbar"><input class="input" placeholder="Search employees…" style="flex:1;max-width:260px">' +
+      '<button class="btn outline">Bulk import CSV</button><button class="btn primary">+ Add employee</button></div>' +
+    '<div class="tbl-card"><table><thead><tr><th>Name</th><th>Department</th><th>Manager</th><th>Email</th><th>Account</th><th></th></tr></thead><tbody>'+rows+'</tbody></table></div>';
+  }
+
+  function renderHrReports(){
+    var cards = [
+      ["Compliance Snapshot","Full document inventory with current status, as of today.", ICONS.doc],
+      ["Overdue / Expired Report","All documents past expiry, with days overdue and escalation status.", ICONS.permit],
+      ["Notification Activity","Delivery log by channel and outcome for a selected date range.", ICONS.cert],
+      ["Renewal History","All renewal events in a selected period, for audit trail purposes.", ICONS.license],
+    ].map(function(c){
+      return '<div class="card"><div class="doccard" style="border:none;padding:0">' +
+        '<div class="ic">'+icon(c[2])+'</div><div><h3>'+c[0]+'</h3><div class="meta">'+c[1]+'</div>' +
+        '<div style="margin-top:12px"><button class="btn ghost sm">Generate PDF</button> <button class="btn outline sm">CSV</button></div></div></div></div>';
+    }).join("");
+    return head("Reports","HR · COMPLIANCE","Generate audit-ready reports on demand — PDF or CSV.") +
+    '<div class="doccardgrid">'+cards+'</div>' +
+    '<div class="sectiongap"><h3 style="color:var(--navy);font-size:15px;margin:0 0 10px">Recently generated</h3>' +
+    '<div class="tbl-card"><table><thead><tr><th>Report</th><th>Range</th><th>Generated</th><th></th></tr></thead><tbody>' +
+    '<tr><td>Compliance Snapshot</td><td>As of 01 Oct 2026</td><td>01 Oct 2026, 09:00</td><td><button class="btn outline sm">Download</button></td></tr>' +
+    '<tr><td>Overdue / Expired</td><td>Q3 2026</td><td>30 Sep 2026, 18:12</td><td><button class="btn outline sm">Download</button></td></tr>' +
+    '</tbody></table></div></div>';
+  }
+
+  /* ---------------- Render: Manager screens ---------------- */
+  var TEAM_DOCS = DOCS.filter(function(d){
+    return ["A. Rahman","L. Novak","P. Dsouza"].indexOf(d.employee) > -1;
+  });
+
+  function renderMgrDashboard(){
+    return head("Team Dashboard","MANAGER · S. IYER'S TEAM","Compliance status for your 3 direct reports — Operations and Finance.") +
+    dashTiles({valid:0, soon:2, urgent5:0, expired:1, renewed:0}) +
+    docTable(TEAM_DOCS);
+  }
+
+  function renderMgrDocs(){
+    return head("Team Documents","MANAGER · DOCUMENTS","Every document belonging to your direct reports.") +
+    '<div class="toolbar"><select class="select"><option>All statuses</option></select><input class="input" placeholder="Search…"></div>' +
+    docTable(TEAM_DOCS);
+  }
+
+  function renderMgrEscalations(){
+    var esc = TEAM_DOCS.filter(function(d){ return d.status==="urgent" || d.status==="crit"; });
+    var rows = esc.map(function(d){
+      return '<tr><td><div class="avatarname">'+avatar(d.employee)+'<span>'+d.employee+'</span></div></td><td>'+d.type+'</td><td>'+d.expiry+'</td>' +
+        '<td>'+pill(d.status,d.label)+'</td><td><button class="btn primary sm">Renew now</button> <button class="btn outline sm">Dismiss…</button></td></tr>';
+    }).join("");
+    return head("Escalations","MANAGER · ACTION REQUIRED","Documents for your team that are overdue or about to expire and need your attention.") +
+    '<div class="callout warn">1 document on your team has already expired and 0 are within 5 days — escalation notices are repeating every 7 days until resolved.</div>' +
+    '<div class="tbl-card"><table><thead><tr><th>Employee</th><th>Document</th><th>Expiry</th><th>Status</th><th>Actions</th></tr></thead><tbody>'+rows+'</tbody></table></div>';
+  }
+
+  /* ---------------- Render: Employee screens ---------------- */
+  var MY_DOCS = DOCS.filter(function(d){ return d.employee === "M. Chen"; });
+
+  function renderEmpDocs(){
+    var cards = MY_DOCS.map(function(d){
+      return '<div class="doccard"><div class="ic">'+icon(docIcon(d.type))+'</div>' +
+        '<div style="flex:1"><h3>'+d.type+'</h3><div class="meta">Expires '+d.expiry+'</div>' +
+        '<div style="margin-top:8px">'+pill(d.status,d.label)+'</div></div>' +
+        '<button class="btn ghost sm">Renew</button></div>';
+    }).join("");
+    return head("My Documents","EMPLOYEE · M. CHEN","The documents DocRenew is tracking for you, and when each one needs attention.") +
+    '<div class="doccardgrid">'+cards+'</div>' +
+    '<div class="sectiongap"><button class="btn primary">+ Add a document</button></div>';
+  }
+
+  function renderEmpProfile(){
+    return head("My Profile","EMPLOYEE · ACCOUNT","Keep your contact details current so reminders reach the right place.") +
+    '<div class="card"><div class="formgrid">' +
+      field("Full name","M. Chen","readonly") +
+      field("Department","Engineering","readonly") +
+      field("Manager","J. Okafor","readonly") +
+      field("Contact email","m.chen@acmeco.com") +
+      field("Contact phone","+1 (415) 555-0148") +
+    '</div><div class="sectiongap"><button class="btn primary">Save changes</button></div></div>' +
+    '<div class="sectiongap"><h3 style="color:var(--navy);font-size:15px;margin:0 0 4px">Notification preferences</h3>' +
+    '<div class="card">' +
+      toggleRow("Email reminders","Early, follow-up, urgent, and expiry notices",true) +
+      toggleRow("SMS reminders","Urgent (5-day) and expiry notices only",true) +
+      toggleRow("Push notifications","Mobile app alerts for all stages",false) +
+    '</div></div>';
+  }
+
+  function renderEmpRenew(){
+    return head("Renew a Document","EMPLOYEE · VISA — EXPIRES IN 5 DAYS","Update the expiry date and attach a new copy once your renewal is complete.") +
+    '<div class="steps">' +
+      '<div class="step done">1. Select document</div>' +
+      '<div class="step active">2. Enter new details</div>' +
+      '<div class="step">3. Confirm</div>' +
+    '</div>' +
+    '<div class="callout warn">This document expires in 5 days. Submitting your renewal here notifies HR automatically and resets your reminder schedule.</div>' +
+    '<div class="card"><div class="formgrid">' +
+      field("Document type","Visa","readonly") +
+      field("New document number","") +
+      field("New issue date","") +
+      field("New expiry date","") +
+    '</div>' +
+    '<div class="field sectiongap"><label>Attach renewed document</label>' +
+      '<div style="border:1px dashed var(--line);border-radius:10px;padding:22px;text-align:center;color:var(--muted);font-size:12.5px">Drag a file here, or click to upload (PDF, JPG, PNG)</div>' +
+    '</div>' +
+    '<div class="sectiongap"><button class="btn primary">Submit renewal</button> <button class="btn outline" style="margin-left:8px">Cancel</button></div>' +
+    '</div>';
+  }
+
+  /* ---------------- Small shared builders ---------------- */
+  function head(title, eyebrow, sub){
+    return '<div class="screen-head"><div class="eyebrow">'+eyebrow+'</div><h1>'+title+'</h1><p>'+sub+'</p></div>';
+  }
+  function field(label, value, kind){
+    var input = kind==="select"
+      ? '<select><option>'+value+'</option></select>'
+      : '<input type="text" value="'+value+'"'+(kind==="readonly"?' readonly style="opacity:.75"':'')+'>';
+    return '<div class="field"><label>'+label+'</label>'+input+'</div>';
+  }
+  function toggleRow(title, desc, on){
+    return '<div class="toggle"><div><div class="t">'+title+'</div><div class="d">'+desc+'</div></div>' +
+      '<div class="switch'+(on?' on':'')+'"><i></i></div></div>';
+  }
+
+  /* ---------------- Login ---------------- */
+  function renderLogin(){
+    var demoBtns = ROLES.map(function(r){
+      return '<button class="demobtn" data-demo-role="'+r.id+'"><span class="r">'+r.label+'</span>Continue as '+r.viewer.name.split(" ")[0]+'</button>';
+    }).join("");
+    app.innerHTML =
+      '<div class="loginwrap"><div style="width:100%;max-width:380px">' +
+        '<div class="loginbrand"><span class="logo">'+icon('<path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>')+'</span><span>DocRenew</span></div>' +
+        '<div class="logincard">' +
+          '<h1>Sign in to your workspace</h1>' +
+          '<p class="sub">Acme Manufacturing Co. &middot; Employee Document Renewal Management</p>' +
+          '<div class="loginfield"><label>Email</label><input type="text" placeholder="you@acmeco.com"></div>' +
+          '<div class="loginfield"><label>Password</label><input type="password" placeholder="••••••••••"></div>' +
+          '<div class="loginrow"><span style="color:var(--muted)">Stay signed in for 14 days</span><a href="#" data-action="forgot">Forgot password?</a></div>' +
+          '<button class="loginbtn" data-action="signin">Sign in</button>' +
+          '<div class="logindivider">Demo &mdash; continue as</div>' +
+          '<div class="demorow">'+demoBtns+'</div>' +
+        '</div>' +
+        '<div class="loginfoot">DocRenew &middot; Zamorins Solutions</div>' +
+      '</div></div>';
+
+    function enter(roleId){
+      state.view = "app";
+      state.role = roleId;
+      state.screen = ROLES.filter(function(x){return x.id===roleId})[0].screens[0].id;
+      render();
+    }
+    app.querySelector('[data-action="signin"]').addEventListener("click", function(){ enter(state.role || "hr"); });
+    app.querySelectorAll("[data-demo-role]").forEach(function(btn){
+      btn.addEventListener("click", function(){ enter(btn.getAttribute("data-demo-role")); });
+    });
+  }
+
+  function signOut(){
+    state.view = "login";
+    render();
+  }
+
+  /* ---------------- App shell ---------------- */
+  var app = document.getElementById("app");
+
+  function render(){
+    if(state.view === "login"){ renderLogin(); } else { renderShell(); }
+  }
+
+  function currentRole(){
+    for(var i=0;i<ROLES.length;i++) if(ROLES[i].id===state.role) return ROLES[i];
+    return ROLES[0];
+  }
+  function currentScreen(role){
+    for(var i=0;i<role.screens.length;i++) if(role.screens[i].id===state.screen) return role.screens[i];
+    return role.screens[0];
+  }
+
+  function renderShell(){
+    var role = currentRole();
+    var screen = currentScreen(role);
+
+    var tabsHtml = ROLES.map(function(r){
+      return '<button class="roletab'+(r.id===role.id?' active':'')+'" data-role="'+r.id+'">'+r.label+'</button>';
+    }).join("");
+
+    var navHtml = role.screens.map(function(s){
+      return '<div class="navitem'+(s.id===screen.id?' active':'')+'" data-screen="'+s.id+'"><span class="dot"></span>'+s.label+'</div>';
+    }).join("");
+
+    app.innerHTML =
+      '<div class="topbar">' +
+        '<div class="brand"><span class="logo">'+icon('<path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>')+'</span><span class="brand-name">DocRenew</span></div>' +
+        '<div class="roletabs">'+tabsHtml+'</div>' +
+        '<div class="spacer"></div>' +
+        '<div class="viewer">'+avatar(role.viewer.name)+'<span>'+role.viewer.name+' · '+role.viewer.role+'</span><button class="signout" data-action="signout">Sign out</button></div>' +
+      '</div>' +
+      '<div class="shell">' +
+        '<div class="sidebar"><div class="label">'+role.label+' screens</div>'+navHtml+'</div>' +
+        '<div class="main" id="screenbody"></div>' +
+      '</div>';
+
+    document.getElementById("screenbody").innerHTML = screen.render();
+
+    app.querySelectorAll(".roletab").forEach(function(btn){
+      btn.addEventListener("click", function(){
+        var r = btn.getAttribute("data-role");
+        state.role = r;
+        state.screen = ROLES.filter(function(x){return x.id===r})[0].screens[0].id;
+        renderShell();
+        window.scrollTo(0,0);
+      });
+    });
+    app.querySelectorAll(".navitem").forEach(function(item){
+      item.addEventListener("click", function(){
+        state.screen = item.getAttribute("data-screen");
+        renderShell();
+        window.scrollTo(0,0);
+      });
+    });
+    app.querySelectorAll(".switch").forEach(function(sw){
+      sw.addEventListener("click", function(){ sw.classList.toggle("on"); });
+    });
+    var signoutBtn = app.querySelector('[data-action="signout"]');
+    if(signoutBtn) signoutBtn.addEventListener("click", signOut);
+  }
+
+  render();
+})();
+</script>

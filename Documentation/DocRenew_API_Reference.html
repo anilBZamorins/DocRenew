@@ -1,0 +1,395 @@
+<title>DocRenew API Reference</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@700;800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+:root{
+  --bg:#f4f8fb; --surface:#ffffff; --surface-2:#f8fafd; --line:#dfe7f0; --ink:#0f2033; --muted:#5b6b7d;
+  --navy:#0b2545; --blue:#1d6fb8; --teal:#12a4a4; --sky:#eaf2fb;
+  --get:#1d6fb8; --get-bg:#e8f1fb;
+  --post:#1f7a56; --post-bg:#e1f3ea;
+  --patch:#9a6a12; --patch-bg:#fbeed9;
+  --del:#a23b3b; --del-bg:#f8e0e0;
+  --code-bg:#0e2338; --code-ink:#cfe3f7; --code-key:#7fd4d4; --code-str:#c3daf2; --code-num:#f2c778;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0a1626; --surface:#101f34; --surface-2:#0d1a2c; --line:#213a52; --ink:#e8f0fa; --muted:#93a7bf;
+    --navy:#d7e6f8; --blue:#6cb0ec; --teal:#52dada; --sky:#122a44;
+    --get:#6cb0ec; --get-bg:#122a44;
+    --post:#86e4bc; --post-bg:#113526;
+    --patch:#f3cd82; --patch-bg:#3a2d10;
+    --del:#f3a3a3; --del-bg:#3a1818;
+    --code-bg:#06121f; --code-ink:#cfe3f7; --code-key:#7fd4d4; --code-str:#c3daf2; --code-num:#f2c778;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0a1626; --surface:#101f34; --surface-2:#0d1a2c; --line:#213a52; --ink:#e8f0fa; --muted:#93a7bf;
+  --navy:#d7e6f8; --blue:#6cb0ec; --teal:#52dada; --sky:#122a44;
+  --get:#6cb0ec; --get-bg:#122a44;
+  --post:#86e4bc; --post-bg:#113526;
+  --patch:#f3cd82; --patch-bg:#3a2d10;
+  --del:#f3a3a3; --del-bg:#3a1818;
+  --code-bg:#06121f; --code-ink:#cfe3f7; --code-key:#7fd4d4; --code-str:#c3daf2; --code-num:#f2c778;
+  color-scheme: dark;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:'Inter',-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
+h1,h2,h3,.brand-name{font-family:'Manrope',Inter,sans-serif}
+code,pre,.mono{font-family:'JetBrains Mono',"SF Mono",Menlo,Consolas,monospace}
+
+header.top{
+  background:linear-gradient(135deg,var(--navy),#123a63 70%);color:#eaf3ff;padding:46px 28px 38px;
+}
+.top-inner{max-width:1180px;margin:0 auto}
+.eyebrow{display:inline-flex;align-items:center;gap:10px;font-size:11.5px;font-weight:800;letter-spacing:.18em;text-transform:uppercase;color:#7fd4d4;margin-bottom:14px}
+.eyebrow::before{content:"";width:26px;height:2px;background:var(--teal);border-radius:2px}
+header.top h1{font-size:clamp(26px,3.6vw,36px);font-weight:800;letter-spacing:-.02em;margin:0 0 8px}
+header.top .sub{font-size:15px;color:#c3daf2;max-width:60ch;line-height:1.55;margin:0 0 18px}
+.metarow{display:flex;flex-wrap:wrap;gap:8px 24px;font-size:12.5px;color:#9fc0e4}
+.metarow b{color:#fff}
+
+.layout{max-width:1180px;margin:0 auto;display:flex;gap:34px;padding:34px 28px 90px;align-items:flex-start}
+.toc{position:sticky;top:20px;width:220px;flex:0 0 auto;display:flex;flex-direction:column;gap:2px}
+.toc .lbl{font-size:10.5px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);padding:4px 10px 10px}
+.toc a{display:flex;align-items:center;gap:9px;padding:8px 10px;border-radius:9px;font-size:13px;font-weight:600;color:var(--ink);text-decoration:none}
+.toc a:hover{background:var(--sky)}
+.toc a .dot{width:6px;height:6px;border-radius:50%;background:var(--line);flex:0 0 auto}
+.toc a:hover .dot{background:var(--teal)}
+
+.content{flex:1;min-width:0}
+.intro-card{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:22px 26px;margin-bottom:30px}
+.intro-card h2{font-size:17px;color:var(--navy);margin:0 0 8px}
+.intro-card p{font-size:13.5px;color:var(--ink);line-height:1.65;margin:0 0 10px}
+.intro-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;margin-top:14px}
+@media (max-width:760px){.intro-grid{grid-template-columns:1fr}}
+.intro-item h3{font-size:12.5px;text-transform:uppercase;letter-spacing:.05em;color:var(--teal);margin:0 0 5px}
+.intro-item p{font-size:13px;color:var(--muted);margin:0}
+.intro-item code{background:var(--surface-2);border:1px solid var(--line);padding:1px 6px;border-radius:5px;font-size:12px;color:var(--navy)}
+
+.module{margin-bottom:46px;scroll-margin-top:20px}
+.module-head{display:flex;align-items:baseline;gap:14px;margin-bottom:16px;padding-bottom:12px;border-bottom:2px solid var(--line)}
+.module-head h2{font-size:21px;color:var(--navy);font-weight:800;margin:0}
+.module-head .count{margin-left:auto;font-size:11px;font-weight:800;color:var(--blue);background:var(--sky);padding:5px 12px;border-radius:999px;white-space:nowrap}
+.module-desc{font-size:13px;color:var(--muted);margin:-8px 0 18px;max-width:70ch}
+
+.ep{background:var(--surface);border:1px solid var(--line);border-radius:14px;margin-bottom:14px;overflow:hidden}
+.ep-head{display:flex;align-items:center;gap:12px;padding:14px 18px;flex-wrap:wrap;cursor:default}
+.method{font-size:11px;font-weight:800;letter-spacing:.03em;padding:4px 10px;border-radius:7px;flex:0 0 auto}
+.method.get{background:var(--get-bg);color:var(--get)}
+.method.post{background:var(--post-bg);color:var(--post)}
+.method.patch{background:var(--patch-bg);color:var(--patch)}
+.method.delete{background:var(--del-bg);color:var(--del)}
+.ep-path{font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--navy);font-weight:600}
+.ep-desc{font-size:12.5px;color:var(--muted);margin-left:auto}
+.ep-body{padding:0 18px 18px}
+.ep-tags{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:12px}
+.tag{font-size:10.5px;font-weight:700;padding:3px 9px;border-radius:999px;background:var(--surface-2);border:1px solid var(--line);color:var(--muted)}
+.tag.role{background:var(--sky);color:var(--navy);border-color:transparent}
+
+.ep-cols{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media (max-width:820px){.ep-cols{grid-template-columns:1fr}}
+.ep-col h4{font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--teal);margin:0 0 8px}
+pre.code{background:var(--code-bg);color:var(--code-ink);border-radius:10px;padding:14px 16px;font-size:12px;line-height:1.6;overflow-x:auto;margin:0}
+pre.code .k{color:var(--code-key)} pre.code .s{color:var(--code-str)} pre.code .n{color:var(--code-num)}
+.params{width:100%;border-collapse:collapse;font-size:12px}
+.params th,.params td{text-align:left;padding:7px 8px;border-bottom:1px solid var(--line)}
+.params th{color:var(--muted);font-weight:700;text-transform:uppercase;font-size:10px;letter-spacing:.05em}
+.params tr:last-child td{border-bottom:none}
+.params code{font-size:11.5px;background:var(--surface-2);padding:1px 5px;border-radius:4px}
+
+footer.f{text-align:center;color:var(--muted);font-size:12.5px;padding:30px 0 50px}
+</style>
+
+<div id="app"></div>
+
+<script>
+(function(){
+
+  function esc(s){ return String(s).replace(/[&<>"]/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); }
+
+  // Lightweight JSON -> highlighted <pre><code> renderer (keys/strings/numbers colored)
+  function code(obj){
+    var json = JSON.stringify(obj, null, 2);
+    json = esc(json);
+    json = json.replace(/"([^"]+)":/g, '<span class="k">"$1"</span>:');
+    json = json.replace(/: "([^"]*)"/g, ': <span class="s">"$1"</span>');
+    json = json.replace(/: (-?\d+(\.\d+)?)/g, ': <span class="n">$1</span>');
+    json = json.replace(/: (true|false|null)/g, ': <span class="n">$1</span>');
+    return '<pre class="code">'+json+'</pre>';
+  }
+  function rawCode(text){ return '<pre class="code">'+esc(text)+'</pre>'; }
+
+  function params(rows){
+    var trs = rows.map(function(r){
+      return '<tr><td><code>'+r[0]+'</code></td><td>'+r[1]+'</td><td>'+r[2]+'</td></tr>';
+    }).join("");
+    return '<table class="params"><thead><tr><th>Field</th><th>Type</th><th>Notes</th></tr></thead><tbody>'+trs+'</tbody></table>';
+  }
+
+  function ep(method, path, desc, tags, reqCol, resCol){
+    return '<div class="ep">' +
+      '<div class="ep-head"><span class="method '+method.toLowerCase()+'">'+method+'</span>' +
+      '<span class="ep-path">'+path+'</span><span class="ep-desc">'+desc+'</span></div>' +
+      '<div class="ep-body">' +
+        '<div class="ep-tags">'+tags.map(function(t){return '<span class="tag'+(t.role?' role':'')+'">'+t.text+'</span>';}).join("")+'</div>' +
+        '<div class="ep-cols">' +
+          '<div class="ep-col"><h4>'+(reqCol.title||'Request')+'</h4>'+reqCol.body+'</div>' +
+          '<div class="ep-col"><h4>'+(resCol.title||'Response')+'</h4>'+resCol.body+'</div>' +
+        '</div>' +
+      '</div>' +
+    '</div>';
+  }
+  function roleTag(r){ return {role:true, text:r}; }
+  function tag(t){ return {role:false, text:t}; }
+
+  /* ==================== MODULES ==================== */
+  var MODULES = [];
+
+  MODULES.push({
+    id:"auth", title:"Authentication", desc:"Sign-in, token refresh, and password reset. No bearer token required on these endpoints.",
+    endpoints:[
+      ep("POST","/api/v1/auth/login","Authenticate with email + password",
+        [tag("Public")],
+        {body: code({email:"m.chen@acmeco.com", password:"••••••••••"})},
+        {body: code({accessToken:"eyJhbGciOi...", refreshToken:"7f0c1e2a...", expiresIn:1800,
+          user:{id:"usr_01HZX...", name:"M. Chen", role:"EMPLOYEE", tenantId:"ten_01HZ..."}})}
+      ),
+      ep("POST","/api/v1/auth/refresh","Exchange a refresh token for a new access token",
+        [tag("Public")],
+        {body: code({refreshToken:"7f0c1e2a..."})},
+        {body: code({accessToken:"eyJhbGciOi...", expiresIn:1800})}
+      ),
+      ep("POST","/api/v1/auth/password-reset/request","Send a password reset email",
+        [tag("Public")],
+        {body: code({email:"m.chen@acmeco.com"})},
+        {title:"Response · 204", body: rawCode("No content")}
+      ),
+      ep("POST","/api/v1/auth/password-reset/complete","Set a new password using the emailed reset token",
+        [tag("Public")],
+        {body: code({token:"rst_8f2a...", newPassword:"••••••••••"})},
+        {title:"Response · 204", body: rawCode("No content")}
+      ),
+    ]
+  });
+
+  MODULES.push({
+    id:"documents", title:"Documents", desc:"The core compliance record. List results and row-level access are scoped automatically by the caller's role (Section 3.2 of the FSD).",
+    endpoints:[
+      ep("GET","/api/v1/documents","List documents, filterable and paginated",
+        [roleTag("Admin · HR: tenant-wide"), roleTag("Manager: team"), roleTag("Employee: own")],
+        {title:"Query params", body: params([
+          ["status","enum","VALID · EXPIRING_SOON · EXPIRING_URGENT · EXPIRED · RENEWED"],
+          ["documentTypeId","uuid","optional"],
+          ["employeeProfileId","uuid","Admin/HR/Manager only"],
+          ["page, pageSize","int","default 1, 20"],
+        ])},
+        {body: code({data:[{id:"doc_01HZ...", employee:"A. Rahman", type:"Work Permit", expiryDate:"2026-11-08", status:"EXPIRING_SOON"}],
+          page:1, pageSize:20, total:8})}
+      ),
+      ep("POST","/api/v1/documents","Create a document record",
+        [roleTag("Admin · HR"), roleTag("Employee: own profile only")],
+        {body: code({employeeProfileId:"emp_01HZ...", documentTypeId:"dt_passport", documentNumber:"P1234567", issueDate:"2023-01-10", expiryDate:"2028-01-10"})},
+        {title:"Response · 201", body: code({id:"doc_01J1...", status:"VALID"})}
+      ),
+      ep("GET","/api/v1/documents/:id","Retrieve one document's full detail",
+        [roleTag("Scoped as above")],
+        {title:"Path param", body: params([["id","uuid","Document id"]])},
+        {body: code({id:"doc_01HZ...", employee:"A. Rahman", type:"Work Permit", documentNumber:"WP-884213",
+          issueDate:"2023-11-12", expiryDate:"2026-11-08", status:"EXPIRING_SOON", lastRenewedAt:null})}
+      ),
+      ep("PATCH","/api/v1/documents/:id","Update a document, including marking it renewed",
+        [roleTag("Admin · HR"), roleTag("Employee: own")],
+        {body: code({expiryDate:"2029-11-08", documentNumber:"WP-991204", renewed:true})},
+        {body: code({id:"doc_01HZ...", status:"VALID", lastRenewedAt:"2026-10-13T09:40:00Z"})}
+      ),
+      ep("GET","/api/v1/documents/:id/attachment-url","Issue a short-lived signed URL for the stored attachment",
+        [roleTag("Scoped as above")],
+        {title:"Path param", body: params([["id","uuid","Document id"]])},
+        {body: code({url:"https://storage.docrenew.app/s/8f2a.../ttl=300", expiresAt:"2026-10-13T09:45:00Z"})}
+      ),
+    ]
+  });
+
+  MODULES.push({
+    id:"notifications", title:"Notifications", desc:"Read-only delivery log for the reminder engine, plus a manual retry action.",
+    endpoints:[
+      ep("GET","/api/v1/notifications","Query the delivery log",
+        [roleTag("Admin · HR")],
+        {title:"Query params", body: params([
+          ["documentId","uuid","optional"],
+          ["stage","enum","EARLY · FOLLOW_UP · URGENT · EXPIRY · ESCALATION"],
+          ["status","enum","QUEUED · SENT · DELIVERED · FAILED · BOUNCED"],
+          ["from, to","date","optional range"],
+        ])},
+        {body: code({data:[{id:"ntf_01J0...", documentId:"doc_01HZ...", stage:"URGENT", channel:"SMS", status:"DELIVERED", attemptCount:1}],
+          page:1, pageSize:20, total:3})}
+      ),
+      ep("POST","/api/v1/notifications/:id/retry","Manually retry a failed notification",
+        [roleTag("Admin")],
+        {title:"Path param", body: params([["id","uuid","Notification id"]])},
+        {body: code({id:"ntf_01J0...", status:"QUEUED", attemptCount:2})}
+      ),
+    ]
+  });
+
+  MODULES.push({
+    id:"dashboard", title:"Dashboard", desc:"Aggregated status counts for the caller's role scope — powers the summary tiles.",
+    endpoints:[
+      ep("GET","/api/v1/dashboard/summary","Role-scoped status tile counts",
+        [roleTag("All roles · scope varies")],
+        {title:"Request", body: rawCode("No body")},
+        {body: code({valid:3, expiringSoon:2, expiringUrgent:1, expired:1, renewed30d:1})}
+      ),
+    ]
+  });
+
+  MODULES.push({
+    id:"reports", title:"Reports", desc:"Audit-ready reports, generated asynchronously and downloaded once ready.",
+    endpoints:[
+      ep("POST","/api/v1/reports","Request a report generation job",
+        [roleTag("Admin · HR"), roleTag("Manager: team-scoped")],
+        {body: code({type:"compliance-snapshot", format:"pdf", filters:{status:"EXPIRING_SOON"}})},
+        {title:"Response · 202", body: code({id:"rpt_01J2...", status:"QUEUED"})}
+      ),
+      ep("GET","/api/v1/reports/:id","Poll status or retrieve the generated report",
+        [roleTag("Admin · HR"), roleTag("Manager: team-scoped")],
+        {title:"Path param", body: params([["id","uuid","Report job id"]])},
+        {body: code({id:"rpt_01J2...", status:"READY", downloadUrl:"https://storage.docrenew.app/reports/rpt_01J2....pdf"})}
+      ),
+    ]
+  });
+
+  MODULES.push({
+    id:"profiles", title:"Employee Profiles", desc:"CRUD for the workforce members documents are tracked against.",
+    endpoints:[
+      ep("GET","/api/v1/employee-profiles","List employee profiles",
+        [roleTag("Admin · HR: all"), roleTag("Manager: direct reports")],
+        {title:"Query params", body: params([["department","string","optional"], ["q","string","search by name"]])},
+        {body: code({data:[{id:"emp_01HZ...", name:"A. Rahman", department:"Operations", managerId:"emp_02HZ..."}], page:1, pageSize:20, total:6})}
+      ),
+      ep("POST","/api/v1/employee-profiles","Create an employee profile",
+        [roleTag("Admin · HR")],
+        {body: code({name:"New Hire", department:"Operations", managerId:"emp_02HZ...", contactEmail:"new.hire@acmeco.com"})},
+        {title:"Response · 201", body: code({id:"emp_01J3..."})}
+      ),
+      ep("GET","/api/v1/employee-profiles/:id","Retrieve one profile",
+        [roleTag("Admin · HR · Manager (own team) · Employee (self)")],
+        {title:"Path param", body: params([["id","uuid","Profile id"]])},
+        {body: code({id:"emp_01HZ...", name:"A. Rahman", department:"Operations", managerId:"emp_02HZ...", active:true})}
+      ),
+      ep("PATCH","/api/v1/employee-profiles/:id","Update a profile",
+        [roleTag("Admin · HR"), roleTag("Employee: own contact fields only")],
+        {body: code({contactPhone:"+1 (415) 555-0148"})},
+        {body: code({id:"emp_01HZ...", contactPhone:"+1 (415) 555-0148"})}
+      ),
+    ]
+  });
+
+  MODULES.push({
+    id:"config", title:"Configuration", desc:"Tenant-level settings: document types, reminder schedules, and notification templates. All Admin-only, HR read access.",
+    endpoints:[
+      ep("GET","/api/v1/config/document-types","List document types",
+        [roleTag("Admin: full"), roleTag("HR: view")],
+        {title:"Request", body: rawCode("No body")},
+        {body: code({data:[{id:"dt_passport", name:"Passport", sortOrder:1, retired:false}]})}
+      ),
+      ep("POST","/api/v1/config/document-types","Add a document type",
+        [roleTag("Admin")],
+        {body: code({name:"Health Card", sortOrder:6})},
+        {title:"Response · 201", body: code({id:"dt_01J4..."})}
+      ),
+      ep("PATCH","/api/v1/config/document-types/:id","Rename, reorder, or retire a document type",
+        [roleTag("Admin")],
+        {body: code({retired:true})},
+        {body: code({id:"dt_01J4...", retired:true})}
+      ),
+      ep("GET","/api/v1/config/reminder-schedules","Get the tenant's default and per-type reminder stage offsets",
+        [roleTag("Admin: full"), roleTag("HR: view")],
+        {title:"Request", body: rawCode("No body")},
+        {body: code({data:[{documentTypeId:null, stages:[{stage:"EARLY",offsetDays:90,channels:["EMAIL"]},{stage:"URGENT",offsetDays:5,channels:["EMAIL","SMS"]}]}]})}
+      ),
+      ep("PATCH","/api/v1/config/reminder-schedules/:id","Update stage offsets, channels, or recipients",
+        [roleTag("Admin")],
+        {body: code({stages:[{stage:"URGENT",offsetDays:3,channels:["EMAIL","SMS","PUSH"]}]})},
+        {body: code({id:"rs_01J5...", updated:true})}
+      ),
+      ep("GET","/api/v1/config/notification-templates","List message templates per stage/channel",
+        [roleTag("Admin: full"), roleTag("HR: view")],
+        {title:"Request", body: rawCode("No body")},
+        {body: code({data:[{stage:"URGENT", channel:"SMS", body:"{{employeeName}}, your {{documentType}} expires in {{daysRemaining}} days."}]})}
+      ),
+      ep("PATCH","/api/v1/config/notification-templates/:id","Edit a template's subject/body",
+        [roleTag("Admin")],
+        {body: code({body:"Reminder: your {{documentType}} expires {{expiryDate}}."})},
+        {body: code({id:"nt_01J6...", updated:true})}
+      ),
+    ]
+  });
+
+  MODULES.push({
+    id:"users", title:"Users, Roles & Audit", desc:"Account management and the compliance audit trail.",
+    endpoints:[
+      ep("GET","/api/v1/users","List tenant users",
+        [roleTag("Admin")],
+        {title:"Query params", body: params([["role","enum","ADMIN · HR · MANAGER · EMPLOYEE"], ["status","enum","INVITED · ACTIVE · SUSPENDED"]])},
+        {body: code({data:[{id:"usr_01HZ...", name:"Latha Kumar", role:"HR", status:"ACTIVE"}], page:1, pageSize:20, total:12})}
+      ),
+      ep("POST","/api/v1/users/invite","Invite a new user by email",
+        [roleTag("Admin")],
+        {body: code({email:"new.user@acmeco.com", role:"HR"})},
+        {title:"Response · 201", body: code({id:"usr_01J7...", status:"INVITED"})}
+      ),
+      ep("PATCH","/api/v1/users/:id","Change a user's role or status",
+        [roleTag("Admin")],
+        {body: code({status:"SUSPENDED"})},
+        {body: code({id:"usr_01HZ...", status:"SUSPENDED"})}
+      ),
+      ep("GET","/api/v1/audit-logs","Query the audit trail",
+        [roleTag("Admin: full"), roleTag("HR: view")],
+        {title:"Query params", body: params([["entityType","string","e.g. document, user, config"], ["from, to","date","optional range"]])},
+        {body: code({data:[{id:"aud_01J8...", actor:"Latha Kumar", action:"document.viewNumber", entityType:"document", createdAt:"2026-10-12T16:02:00Z"}]})}
+      ),
+    ]
+  });
+
+  /* ==================== Render ==================== */
+  var tocHtml = '<div class="lbl">Modules</div>' + MODULES.map(function(m){
+    return '<a href="#'+m.id+'"><span class="dot"></span>'+m.title+'</a>';
+  }).join("");
+
+  var modulesHtml = MODULES.map(function(m){
+    return '<section class="module" id="'+m.id+'">' +
+      '<div class="module-head"><h2>'+m.title+'</h2><span class="count">'+m.endpoints.length+' endpoint'+(m.endpoints.length>1?'s':'')+'</span></div>' +
+      '<p class="module-desc">'+m.desc+'</p>' +
+      m.endpoints.join("") +
+    '</section>';
+  }).join("");
+
+  document.getElementById("app").innerHTML =
+    '<header class="top"><div class="top-inner">' +
+      '<div class="eyebrow">REST API Reference · v1</div>' +
+      '<h1>DocRenew API</h1>' +
+      '<p class="sub">The HTTP API behind the DocRenew platform — authentication, document tracking, the notification engine, dashboards, reports, and tenant configuration. Companion to the Functional Specification Document, Section 7.</p>' +
+      '<div class="metarow"><span><b>Version</b> 1.0 (Draft)</span><span><b>Base URL</b> https://api.docrenew.app/api/v1</span><span><b>Prepared by</b> Anil B · Zamorins Solutions</span></div>' +
+    '</div></header>' +
+    '<div class="layout">' +
+      '<nav class="toc">'+tocHtml+'</nav>' +
+      '<div class="content">' +
+        '<div class="intro-card">' +
+          '<h2>Conventions</h2>' +
+          '<p>All endpoints are versioned under <code>/api/v1</code> and return JSON. Authenticated requests carry a bearer token; <code>tenantId</code> and <code>role</code> are derived from that token server-side and are never read from the request body.</p>' +
+          '<div class="intro-grid">' +
+            '<div class="intro-item"><h3>Authentication</h3><p>'+'<code>Authorization: Bearer &lt;accessToken&gt;</code> on every request except Section 1 (Auth) itself.</p></div>' +
+            '<div class="intro-item"><h3>Pagination</h3><p>List endpoints accept <code>page</code> &amp; <code>pageSize</code> and return <code>{ data, page, pageSize, total }</code>.</p></div>' +
+            '<div class="intro-item"><h3>Errors</h3><p>Non-2xx responses return <code>{ error: { code, message, details? } }</code> with standard HTTP status codes.</p></div>' +
+            '<div class="intro-item"><h3>Multi-tenancy</h3><p>Every query is scoped to the caller\'s tenant automatically — there is no cross-tenant parameter.</p></div>' +
+          '</div>' +
+        '</div>' +
+        modulesHtml +
+      '</div>' +
+    '</div>' +
+    '<footer class="f">DocRenew API Reference &middot; v1.0 (Draft) &middot; Zamorins Solutions</footer>';
+
+})();
+</script>
