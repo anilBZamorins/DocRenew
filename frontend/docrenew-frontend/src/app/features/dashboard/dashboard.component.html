@@ -31,6 +31,12 @@
     >
       Admin &amp; Config
     </a>
+    <a
+      routerLink="/audit-log"
+      class="text-[11.5px] font-bold text-[#cfe0f5] no-underline hover:text-white"
+    >
+      Audit log
+    </a>
   }
   <div class="flex-1"></div>
   @if (auth.currentUser(); as user) {
@@ -207,6 +213,9 @@
                 <span class="inline-flex items-center gap-1.5 text-[11px] font-bold px-2.5 py-1 rounded-pill whitespace-nowrap" [class]="pillClasses(doc.status)">
                   <span class="w-1.5 h-1.5 rounded-full bg-current"></span>{{ statusPresentation(doc.status).label }}
                 </span>
+                @if (doc.status === 'EXPIRED' && doc.escalation_dismissed) {
+                  <div class="text-[10.5px] text-muted mt-1">Escalation dismissed</div>
+                }
               </td>
               <td class="px-3 py-2.5 border-b border-line whitespace-nowrap">
                 <a
@@ -221,6 +230,14 @@
                 >
                   Renew
                 </button>
+                @if (doc.status === 'EXPIRED' && !doc.escalation_dismissed && canDismissEscalation()) {
+                  <button
+                    class="border border-line bg-transparent text-urgent rounded-[9px] px-[11px] py-[5px] text-xs font-bold inline-flex items-center gap-1.5 ml-1.5"
+                    (click)="openDismissModal(doc)"
+                  >
+                    Dismiss escalation
+                  </button>
+                }
               </td>
             </tr>
           }
@@ -294,6 +311,36 @@
           (click)="confirmRenew()"
         >
           Save
+        </button>
+      </div>
+    </div>
+  </div>
+}
+
+@if (dismissDocId()) {
+  <div class="fixed inset-0 bg-[rgba(5,15,30,.45)] flex items-center justify-center z-50" (click)="closeDismissModal()">
+    <div class="bg-surface rounded-card px-6 py-5.5 w-full max-w-[400px] shadow-[0_30px_80px_rgba(5,15,30,.35)]" (click)="$event.stopPropagation()">
+      <h3 class="m-0 mb-2 text-navy text-base font-display font-bold">Dismiss escalation</h3>
+      <p class="text-muted text-[12.5px] m-0 mb-3.5">Recorded on the audit trail. This does not renew the document — it just stops further escalation for it.</p>
+      <div class="mb-3.5">
+        <label class="block text-[11.5px] font-bold text-muted mb-1.5 uppercase tracking-wide">Reason</label>
+        <textarea
+          rows="3"
+          maxlength="1000"
+          class="w-full border border-line bg-surface-2 text-ink rounded-[9px] px-3 py-2.5 text-[13.5px] font-sans resize-none"
+          [ngModel]="dismissReason()"
+          (ngModelChange)="dismissReason.set($event)"
+        ></textarea>
+      </div>
+      <div class="flex justify-end gap-2 mt-1">
+        <button class="border border-line bg-transparent text-ink rounded-[9px] px-4 py-2 text-[13px] font-bold" (click)="closeDismissModal()">Cancel</button>
+        <button
+          class="text-white border-0 rounded-[9px] px-4 py-2 text-[13px] font-bold disabled:opacity-50 disabled:cursor-not-allowed"
+          style="background: linear-gradient(135deg, var(--urgent), #b23a3a);"
+          [disabled]="!dismissReason().trim() || dismissing()"
+          (click)="confirmDismiss()"
+        >
+          {{ dismissing() ? 'Dismissing…' : 'Dismiss' }}
         </button>
       </div>
     </div>

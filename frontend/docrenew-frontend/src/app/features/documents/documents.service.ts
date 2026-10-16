@@ -65,4 +65,15 @@ export class DocumentsService {
     formData.append('file', file);
     return this.http.post<{ data: DocumentRecord }>(`${environment.apiUrl}/documents/${id}/attachment`, formData);
   }
+
+  /**
+   * T36 — DocumentPolicy::dismissEscalation(): Admin/HR (tenant-wide) or
+   * a Manager dismissing an EXPIRED document that belongs to their own
+   * team; never an Employee, even on their own document. Requires a
+   * reason (max 1000 chars per StoreRequest validation) for the audit
+   * trail entry the backend records alongside it.
+   */
+  dismissEscalation(id: string, reason: string): Observable<{ data: DocumentRecord }> {
+    return this.http.post<{ data: DocumentRecord }>(`${environment.apiUrl}/documents/${id}/escalation/dismiss`, { reason });
+  }
 }

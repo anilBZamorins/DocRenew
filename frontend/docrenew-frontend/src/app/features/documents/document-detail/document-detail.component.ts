@@ -84,6 +84,20 @@ export class DocumentDetailComponent implements OnInit {
   readonly deleting = signal(false);
   readonly deleteConfirmOpen = signal(false);
 
+  readonly dismissOpen = signal(false);
+  readonly dismissReason = signal('');
+  readonly dismissing = signal(false);
+
+  /**
+   * T36 — DocumentPolicy::dismissEscalation(): Admin/HR (tenant-wide) or
+   * a Manager on their own team's document; never an Employee, even on
+   * their own. canManage() already matches tenant-wide-or-own-document,
+   * which is a superset of what dismiss needs for a Manager (team, not
+   * just their own record) — the backend enforces the exact boundary
+   * regardless, this just avoids showing a button that would 403.
+   */
+  readonly canDismissEscalation = computed(() => this.auth.currentUser()?.role !== 'EMPLOYEE' && this.canManage());
+
   readonly canManage = computed(() => {
     const d = this.doc();
     const user = this.auth.currentUser();
@@ -254,6 +268,33 @@ export class DocumentDetailComponent implements OnInit {
       error: (err) => {
         this.renewing.set(false);
         this.actionMessage.set(err?.error?.message || 'Could not renew this document.');
+      },
+    });
+  }
+
+  openDismiss(): void {
+    this.dismissReason.set('');
+    this.dismissOpen.set(true);
+  }
+
+  closeDismiss(): void {
+    this.dismissOpen.set(false);
+  }
+
+  confirmDismiss(): void {
+    const reason = this.dismissReason().trim();
+    if (!reason) return;
+    this.dismissing.set(true);
+    this.documentsService.dismissEscalation(this.documentId, reason).subscribe({
+      next: (res) => {
+        this.doc.set(res.data);
+        this.dismissing.set(false);
+        this.dismissOpen.set(false);
+        this.actionMessage.set('Escalation dismissed.');
+      },
+      error: (err) => {
+        this.dismissing.set(false);
+        this.actionMessage.set(err?.error?.message || 'Could not dismiss this escalation.');
       },
     });
   }

@@ -174,3 +174,31 @@ export interface ReportRecord {
   requested_at: string;
   completed_at: string | null;
 }
+
+/**
+ * T36 — Audit log viewer (FSD 3.2 "Audit log | Full | View | None |
+ * None"; AuditLogPolicy::viewAny() is Admin/HR only — Manager and
+ * Employee get no access at all, unlike the "team scope" partial access
+ * reports give a Manager). Matches AuditLogResource's exact shape.
+ */
+export interface AuditLogRecord {
+  id: string;
+  acting_user_id: string | null;
+  acting_user_email: string | null;
+  action: string;
+  entity_type: string;
+  entity_id: string;
+  metadata: Record<string, unknown> | null;
+  created_at: string;
+}
+
+export interface AuditLogFilters {
+  action?: string;
+  entity_type?: string;
+  entity_id?: string;
+  acting_user_id?: string;
+  date_from?: string;
+  date_to?: string;
+  per_page?: number;
+  page?: number;
+}

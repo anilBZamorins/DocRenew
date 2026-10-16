@@ -76,6 +76,19 @@ export class DashboardComponent implements OnInit {
   readonly renewExpiryDate = signal<string>('');
   readonly renewDocumentNumber = signal<string>('');
 
+  readonly dismissDocId = signal<string | null>(null);
+  readonly dismissReason = signal<string>('');
+  readonly dismissing = signal(false);
+
+  /**
+   * Admin/HR/Manager can dismiss an escalation (DocumentPolicy::
+   * dismissEscalation) — never an Employee. Dashboard only ever shows a
+   * Manager their own team and an Employee their own records anyway, so
+   * this role check alone is enough to match the server-side rule; the
+   * backend still enforces it regardless.
+   */
+  readonly canDismissEscalation = computed(() => this.auth.currentUser()?.role !== 'EMPLOYEE');
+
   readonly documentTypes = computed(() => {
     const seen = new Map<string, string>();
     for (const doc of this.documents()) {
@@ -316,6 +329,35 @@ export class DashboardComponent implements OnInit {
       },
       error: (err) => {
         this.actionMessage.set(err?.error?.message || 'Could not renew this document.');
+      },
+    });
+  }
+
+  openDismissModal(doc: DocumentRecord): void {
+    this.dismissDocId.set(doc.id);
+    this.dismissReason.set('');
+  }
+
+  closeDismissModal(): void {
+    this.dismissDocId.set(null);
+  }
+
+  confirmDismiss(): void {
+    const docId = this.dismissDocId();
+    const reason = this.dismissReason().trim();
+    if (!docId || !reason) return;
+
+    this.dismissing.set(true);
+    this.documentsService.dismissEscalation(docId, reason).subscribe({
+      next: () => {
+        this.dismissing.set(false);
+        this.actionMessage.set('Escalation dismissed.');
+        this.closeDismissModal();
+        this.refresh();
+      },
+      error: (err) => {
+        this.dismissing.set(false);
+        this.actionMessage.set(err?.error?.message || 'Could not dismiss this escalation.');
       },
     });
   }

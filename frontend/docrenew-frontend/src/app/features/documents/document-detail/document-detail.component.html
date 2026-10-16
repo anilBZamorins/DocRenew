@@ -71,6 +71,12 @@
           </div>
         </div>
 
+        @if (d.escalation_dismissed) {
+          <div class="mt-4 border-l-[3px] border-line bg-surface-2 rounded-[10px] px-4 py-3 text-[12.5px] text-ink">
+            <span class="font-bold">Escalation dismissed</span> on {{ d.escalation_dismissed.dismissed_at | date: 'medium' }} — {{ d.escalation_dismissed.reason }}
+          </div>
+        }
+
         @if (canManage()) {
           <div class="mt-5 flex items-center gap-2 flex-wrap">
             <button
@@ -83,6 +89,11 @@
             <button class="bg-brand-sky text-navy border-0 rounded-[9px] px-4 py-2 text-[13px] font-bold" (click)="startEditing()">
               Edit details
             </button>
+            @if (d.status === 'EXPIRED' && !d.escalation_dismissed && canDismissEscalation()) {
+              <button class="border border-line bg-transparent text-urgent rounded-[9px] px-4 py-2 text-[13px] font-bold" (click)="openDismiss()">
+                Dismiss escalation
+              </button>
+            }
             @if (!deleteConfirmOpen()) {
               <button class="border border-line bg-transparent text-ink rounded-[9px] px-4 py-2 text-[13px] font-bold ml-auto" (click)="deleteConfirmOpen.set(true)">
                 Delete
@@ -251,6 +262,36 @@
           (click)="confirmRenew()"
         >
           {{ renewing() ? 'Saving…' : 'Save' }}
+        </button>
+      </div>
+    </div>
+  </div>
+}
+
+@if (dismissOpen()) {
+  <div class="fixed inset-0 bg-[rgba(5,15,30,.45)] flex items-center justify-center z-50" (click)="closeDismiss()">
+    <div class="bg-surface rounded-card px-6 py-5.5 w-full max-w-[400px] shadow-[0_30px_80px_rgba(5,15,30,.35)]" (click)="$event.stopPropagation()">
+      <h3 class="m-0 mb-2 text-navy text-base font-display font-bold">Dismiss escalation</h3>
+      <p class="text-muted text-[12.5px] m-0 mb-3.5">Recorded on the audit trail. This does not renew the document — it just stops further escalation for it.</p>
+      <div class="mb-3.5">
+        <label class="block text-[11.5px] font-bold text-muted mb-1.5 uppercase tracking-wide">Reason</label>
+        <textarea
+          rows="3"
+          maxlength="1000"
+          class="w-full border border-line bg-surface-2 text-ink rounded-[9px] px-3 py-2.5 text-[13.5px] font-sans resize-none"
+          [ngModel]="dismissReason()"
+          (ngModelChange)="dismissReason.set($event)"
+        ></textarea>
+      </div>
+      <div class="flex justify-end gap-2 mt-1">
+        <button class="border border-line bg-transparent text-ink rounded-[9px] px-4 py-2 text-[13px] font-bold" (click)="closeDismiss()">Cancel</button>
+        <button
+          class="text-white border-0 rounded-[9px] px-4 py-2 text-[13px] font-bold disabled:opacity-50 disabled:cursor-not-allowed"
+          style="background: linear-gradient(135deg, var(--urgent), #b23a3a);"
+          [disabled]="!dismissReason().trim() || dismissing()"
+          (click)="confirmDismiss()"
+        >
+          {{ dismissing() ? 'Dismissing…' : 'Dismiss' }}
         </button>
       </div>
     </div>
