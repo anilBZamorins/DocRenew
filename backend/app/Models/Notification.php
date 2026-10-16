@@ -19,6 +19,8 @@ class Notification extends Model
         'tenant_id', 'document_id', 'stage', 'channel', 'recipient_role', 'recipient_user_id',
         'status', 'provider_message_id', 'attempt_count', 'expiry_date_snapshot', 'occurrence_date',
         'queued_at', 'sent_at', 'delivered_at', 'failed_at',
+        // T24
+        'next_attempt_at', 'last_error',
     ];
 
     protected $casts = [
@@ -32,6 +34,7 @@ class Notification extends Model
         'sent_at' => 'datetime',
         'delivered_at' => 'datetime',
         'failed_at' => 'datetime',
+        'next_attempt_at' => 'datetime',
         'attempt_count' => 'integer',
     ];
 
