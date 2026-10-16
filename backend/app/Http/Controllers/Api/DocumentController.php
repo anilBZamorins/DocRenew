@@ -4,13 +4,16 @@ namespace App\Http\Controllers\Api;
 
 use App\Enums\UserRole;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\ReassignDocumentOwnerRequest;
 use App\Http\Requests\RenewDocumentRequest;
 use App\Http\Requests\StoreDocumentRequest;
 use App\Http\Requests\UpdateDocumentRequest;
 use App\Http\Resources\DocumentResource;
 use App\Models\AuditLog;
 use App\Models\Document;
+use App\Models\Notification;
 use App\Models\User;
+use App\Services\NotificationDispatcher;
 use App\Services\ReminderEvaluator;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
@@ -29,8 +32,10 @@ use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
  */
 class DocumentController extends Controller
 {
-    public function __construct(private readonly ReminderEvaluator $reminderEvaluator)
-    {
+    public function __construct(
+        private readonly ReminderEvaluator $reminderEvaluator,
+        private readonly NotificationDispatcher $notificationDispatcher,
+    ) {
     }
 
     public function index(Request $request): AnonymousResourceCollection
@@ -180,6 +185,73 @@ class DocumentController extends Controller
         ]);
 
         return new DocumentResource($document);
+    }
+
+    /**
+     * T31 / FSD 4.3 bulk action "reassign owner (Admin/HR only)" —
+     * DocumentPolicy::reassignOwner() restricts this to Admin/HR
+     * regardless of who currently owns the document. Reassigning
+     * immediately re-evaluates reminders against the new owner, same
+     * as update() does for an expiry_date change, so a newly-assigned
+     * owner close to expiry doesn't wait for the next 15-min scan.
+     */
+    public function reassignOwner(ReassignDocumentOwnerRequest $request, Document $document): DocumentResource
+    {
+        $previousOwnerId = $document->employee_profile_id;
+        $newOwnerId = $request->validated('employee_profile_id');
+
+        $document->update(['employee_profile_id' => $newOwnerId]);
+
+        AuditLog::record('document.reassign', 'Document', $document->id, [
+            'previous_employee_profile_id' => $previousOwnerId,
+            'new_employee_profile_id' => $newOwnerId,
+        ]);
+
+        $this->reminderEvaluator->evaluateDocument($document->refresh());
+
+        return new DocumentResource($document->load('documentType'));
+    }
+
+    /**
+     * T31 / FSD 4.3 bulk action "send a manual reminder" —
+     * DocumentPolicy::sendManualReminder() restricts this to Admin/HR.
+     * Forces an immediate re-evaluation (so a stage that's due but
+     * hasn't been picked up by the 15-min scan yet gets queued right
+     * now) and then dispatches, in this same request, every QUEUED
+     * notification for this document that's currently eligible to
+     * send — not just ones evaluateDocument() just created, since an
+     * already-queued-but-not-yet-dispatched row for this document is
+     * exactly what "send it now" means too. Mirrors the eligibility
+     * check in DispatchNotifications (T24): QUEUED and either never
+     * attempted or past its backoff.
+     */
+    public function sendManualReminder(Request $request, Document $document): JsonResponse
+    {
+        $this->authorize('sendManualReminder', $document);
+
+        $this->reminderEvaluator->evaluateDocument($document->refresh());
+
+        $eligible = Notification::query()
+            ->where('document_id', $document->id)
+            ->where('status', 'QUEUED')
+            ->where(function ($q) {
+                $q->whereNull('next_attempt_at')->orWhere('next_attempt_at', '<=', now());
+            })
+            ->get();
+
+        foreach ($eligible as $notification) {
+            $this->notificationDispatcher->dispatch($notification);
+        }
+
+        AuditLog::record('document.reminder.manual_send', 'Document', $document->id, [
+            'notifications_dispatched' => $eligible->count(),
+        ]);
+
+        return response()->json([
+            'data' => [
+                'notifications_dispatched' => $eligible->count(),
+            ],
+        ]);
     }
 
     /**

@@ -1,0 +1,264 @@
+<div
+  class="flex items-center gap-4 px-5 py-3 text-[#eaf3ff] sticky top-0 z-20 flex-wrap"
+  style="background: linear-gradient(135deg, var(--navy), #123a63 70%);"
+>
+  <div class="flex items-center gap-2.5 mr-2 text-white">
+    <span class="w-[30px] h-[30px] rounded-[9px] grid place-items-center text-white" style="background: linear-gradient(135deg, var(--teal), var(--blue));">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-[17px] h-[17px]">
+        <path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
+      </svg>
+    </span>
+    <span class="font-display font-extrabold text-base tracking-tight">DocRenew</span>
+  </div>
+  <div class="flex-1"></div>
+  @if (auth.currentUser(); as user) {
+    <div class="text-xs text-[#9fc0e4] flex items-center gap-2">
+      <span class="w-[26px] h-[26px] rounded-full bg-brand-teal text-[#06241f] grid place-items-center font-extrabold text-[11px]">
+        {{ initials(user.employee_profile?.name ?? user.email) }}
+      </span>
+      <span>{{ user.employee_profile?.name ?? user.email }} &middot; {{ user.role }}</span>
+      <button
+        (click)="auth.logout()"
+        class="bg-transparent border border-white/25 text-[#cfe0f5] rounded-full px-3 py-1 text-[11.5px] font-bold cursor-pointer ml-2 hover:bg-white/10"
+      >
+        Sign out
+      </button>
+    </div>
+  }
+</div>
+
+<div class="px-[30px] pt-[26px] pb-[60px] max-w-[1180px] mx-auto">
+  <div class="mb-5">
+    <div class="text-[11px] font-extrabold tracking-[.14em] uppercase text-brand-teal mb-1.5">
+      {{ auth.isTenantWide ? 'COMPLIANCE' : (auth.currentUser()?.role === 'EMPLOYEE' ? 'MY DOCUMENTS' : 'MY TEAM') }} &middot; OVERVIEW
+    </div>
+    <h1 class="text-[22px] font-display font-extrabold text-navy m-0 mb-1 tracking-tight">
+      {{ auth.currentUser()?.role === 'EMPLOYEE' ? 'My Documents' : (auth.isTenantWide ? 'Compliance Dashboard' : 'Team Dashboard') }}
+    </h1>
+    <p class="text-[13.5px] text-muted m-0 max-w-[62ch]">Every tracked document in your scope, at a glance — filter, sort, or act in bulk.</p>
+  </div>
+
+  @if (errorMessage()) {
+    <div class="border-l-[3px] border-urgent bg-urgent-bg rounded-[10px] px-4 py-3 text-[12.5px] text-ink mb-4">{{ errorMessage() }}</div>
+  }
+  @if (actionMessage()) {
+    <div class="border-l-[3px] border-brand-teal bg-brand-sky rounded-[10px] px-4 py-3 text-[12.5px] text-ink mb-4">{{ actionMessage() }}</div>
+  }
+
+  @if (summary(); as s) {
+    <div class="grid grid-cols-2 md:grid-cols-5 gap-3 mb-[22px]">
+      <div class="bg-surface border border-line rounded-card px-4 py-3.5">
+        <div class="font-display text-[26px] font-extrabold tabular-nums" [class]="tileNumberClasses('ok')">{{ s.valid }}</div>
+        <div class="text-[11.5px] text-muted mt-0.5">Valid</div>
+      </div>
+      <div class="bg-surface border border-line rounded-card px-4 py-3.5">
+        <div class="font-display text-[26px] font-extrabold tabular-nums" [class]="tileNumberClasses('warn')">{{ s.expiring_soon }}</div>
+        <div class="text-[11.5px] text-muted mt-0.5">Expiring soon (&le;90d)</div>
+      </div>
+      <div class="bg-surface border border-line rounded-card px-4 py-3.5">
+        <div class="font-display text-[26px] font-extrabold tabular-nums" [class]="tileNumberClasses('crit')">{{ s.expiring_urgent }}</div>
+        <div class="text-[11.5px] text-muted mt-0.5">Expiring &le;5 days</div>
+      </div>
+      <div class="bg-surface border border-line rounded-card px-4 py-3.5">
+        <div class="font-display text-[26px] font-extrabold tabular-nums" [class]="tileNumberClasses('urgent')">{{ s.expired }}</div>
+        <div class="text-[11.5px] text-muted mt-0.5">Expired</div>
+      </div>
+      <div class="bg-surface border border-line rounded-card px-4 py-3.5">
+        <div class="font-display text-[26px] font-extrabold tabular-nums text-navy">{{ s.renewed_last_30d }}</div>
+        <div class="text-[11.5px] text-muted mt-0.5">Renewed (30d)</div>
+      </div>
+    </div>
+  }
+
+  <div class="flex gap-2.5 items-center mb-3.5 flex-wrap">
+    <select
+      class="border border-line bg-surface text-ink rounded-[9px] px-3 py-2 text-[13px] font-sans"
+      [ngModel]="statusFilter()"
+      (ngModelChange)="statusFilter.set($event); onFilterChange()"
+    >
+      <option value="">All statuses</option>
+      <option value="VALID">Valid</option>
+      <option value="EXPIRING_SOON">Expiring soon</option>
+      <option value="EXPIRING_URGENT">Expiring urgent</option>
+      <option value="EXPIRED">Expired</option>
+      <option value="RENEWED">Renewed</option>
+    </select>
+
+    <select
+      class="border border-line bg-surface text-ink rounded-[9px] px-3 py-2 text-[13px] font-sans"
+      [ngModel]="typeFilter()"
+      (ngModelChange)="typeFilter.set($event); onFilterChange()"
+    >
+      <option value="">All types</option>
+      @for (t of documentTypes(); track t.id) {
+        <option [value]="t.id">{{ t.name }}</option>
+      }
+    </select>
+
+    <input
+      placeholder="Search employee or item…"
+      class="border border-line bg-surface text-ink rounded-[9px] px-3 py-2 text-[13px] font-sans"
+      [ngModel]="search()"
+      (ngModelChange)="search.set($event)"
+    />
+
+    @if (auth.isTenantWide) {
+      <button
+        class="ml-auto border border-line bg-transparent text-ink rounded-[9px] px-4 py-2 text-[13px] font-bold inline-flex items-center gap-1.5 disabled:opacity-50 disabled:cursor-not-allowed"
+        [disabled]="selectedCount === 0"
+        (click)="exportSelected()"
+      >
+        Export selected ({{ selectedCount }})
+      </button>
+      <button
+        class="bg-brand-sky text-navy border-0 rounded-[9px] px-4 py-2 text-[13px] font-bold inline-flex items-center gap-1.5 disabled:opacity-50 disabled:cursor-not-allowed"
+        [disabled]="selectedCount === 0"
+        (click)="openReassignModal()"
+      >
+        Reassign owner
+      </button>
+      <button
+        class="text-white border-0 rounded-[9px] px-4 py-2 text-[13px] font-bold inline-flex items-center gap-1.5 disabled:opacity-50 disabled:cursor-not-allowed"
+        style="background: linear-gradient(135deg, var(--teal), var(--blue));"
+        [disabled]="selectedCount === 0"
+        (click)="sendReminderToSelected()"
+      >
+        Send reminder
+      </button>
+    }
+  </div>
+
+  <div class="bg-surface border border-line rounded-card overflow-hidden">
+    <table class="w-full border-collapse text-[13px]">
+      <thead>
+        <tr>
+          @if (auth.isTenantWide) {
+            <th class="w-8 text-left px-3 py-2.5 border-b border-line bg-surface-2 text-[10.5px] uppercase tracking-wide text-muted font-extrabold">
+              <input type="checkbox" [checked]="allVisibleSelected()" (change)="toggleSelectAll()" />
+            </th>
+          }
+          <th class="text-left px-3 py-2.5 border-b border-line bg-surface-2 text-[10.5px] uppercase tracking-wide text-muted font-extrabold">Employee / Item</th>
+          <th class="text-left px-3 py-2.5 border-b border-line bg-surface-2 text-[10.5px] uppercase tracking-wide text-muted font-extrabold">Type</th>
+          <th class="text-left px-3 py-2.5 border-b border-line bg-surface-2 text-[10.5px] uppercase tracking-wide text-muted font-extrabold">Expiry</th>
+          <th class="text-left px-3 py-2.5 border-b border-line bg-surface-2 text-[10.5px] uppercase tracking-wide text-muted font-extrabold">Status</th>
+          <th class="text-left px-3 py-2.5 border-b border-line bg-surface-2 text-[10.5px] uppercase tracking-wide text-muted font-extrabold">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        @if (loading()) {
+          <tr><td [attr.colspan]="auth.isTenantWide ? 6 : 5" class="px-3 py-2.5 text-muted">Loading…</td></tr>
+        } @else if (filteredDocuments().length === 0) {
+          <tr><td [attr.colspan]="auth.isTenantWide ? 6 : 5" class="px-3 py-2.5 text-muted">No documents match these filters.</td></tr>
+        } @else {
+          @for (doc of filteredDocuments(); track doc.id) {
+            <tr class="last:[&>td]:border-b-0">
+              @if (auth.isTenantWide) {
+                <td class="px-3 py-2.5 border-b border-line">
+                  <input type="checkbox" [checked]="isSelected(doc.id)" (change)="toggleSelect(doc.id)" />
+                </td>
+              }
+              <td class="px-3 py-2.5 border-b border-line">
+                <div class="flex items-center gap-2.5">
+                  <span class="w-7 h-7 rounded-full bg-brand-sky text-navy grid place-items-center text-[11px] font-extrabold">
+                    {{ initials(doc.employee_name) }}
+                  </span>
+                  <span>
+                    {{ doc.employee_name }}
+                    @if (doc.item_label) {
+                      <span class="text-muted font-normal"> &middot; {{ doc.item_label }}</span>
+                    }
+                  </span>
+                </div>
+              </td>
+              <td class="px-3 py-2.5 border-b border-line">{{ doc.document_type }}</td>
+              <td class="px-3 py-2.5 border-b border-line">{{ doc.expiry_date }}</td>
+              <td class="px-3 py-2.5 border-b border-line">
+                <span class="inline-flex items-center gap-1.5 text-[11px] font-bold px-2.5 py-1 rounded-pill whitespace-nowrap" [class]="pillClasses(doc.status)">
+                  <span class="w-1.5 h-1.5 rounded-full bg-current"></span>{{ statusPresentation(doc.status).label }}
+                </span>
+              </td>
+              <td class="px-3 py-2.5 border-b border-line">
+                <button
+                  class="bg-brand-sky text-navy border-0 rounded-[9px] px-[11px] py-[5px] text-xs font-bold inline-flex items-center gap-1.5"
+                  (click)="openRenewModal(doc)"
+                >
+                  Renew
+                </button>
+              </td>
+            </tr>
+          }
+        }
+      </tbody>
+    </table>
+  </div>
+</div>
+
+@if (reassignTargetDocId()) {
+  <div class="fixed inset-0 bg-[rgba(5,15,30,.45)] flex items-center justify-center z-50" (click)="closeReassignModal()">
+    <div class="bg-surface rounded-card px-6 py-5.5 w-full max-w-[380px] shadow-[0_30px_80px_rgba(5,15,30,.35)]" (click)="$event.stopPropagation()">
+      <h3 class="m-0 mb-2 text-navy text-base font-display font-bold">Reassign owner</h3>
+      <p class="text-muted text-[12.5px] m-0 mb-3.5">Reassign the {{ selectedCount }} selected document(s) to a different employee.</p>
+      <div class="mb-3.5">
+        <label class="block text-[11.5px] font-bold text-muted mb-1.5 uppercase tracking-wide">New owner</label>
+        <select
+          class="w-full border border-line bg-surface-2 text-ink rounded-[9px] px-3 py-2.5 text-[13.5px] font-sans"
+          [ngModel]="reassignEmployeeId()"
+          (ngModelChange)="reassignEmployeeId.set($event)"
+        >
+          <option value="">Select an employee…</option>
+          @for (p of employeeProfiles(); track p.id) {
+            <option [value]="p.id">{{ p.name }} &middot; {{ p.department }}</option>
+          }
+        </select>
+      </div>
+      <div class="flex justify-end gap-2 mt-1">
+        <button class="border border-line bg-transparent text-ink rounded-[9px] px-4 py-2 text-[13px] font-bold" (click)="closeReassignModal()">Cancel</button>
+        <button
+          class="text-white border-0 rounded-[9px] px-4 py-2 text-[13px] font-bold disabled:opacity-50 disabled:cursor-not-allowed"
+          style="background: linear-gradient(135deg, var(--teal), var(--blue));"
+          [disabled]="!reassignEmployeeId()"
+          (click)="confirmReassign()"
+        >
+          Reassign
+        </button>
+      </div>
+    </div>
+  </div>
+}
+
+@if (renewDocId()) {
+  <div class="fixed inset-0 bg-[rgba(5,15,30,.45)] flex items-center justify-center z-50" (click)="closeRenewModal()">
+    <div class="bg-surface rounded-card px-6 py-5.5 w-full max-w-[380px] shadow-[0_30px_80px_rgba(5,15,30,.35)]" (click)="$event.stopPropagation()">
+      <h3 class="m-0 mb-2 text-navy text-base font-display font-bold">Mark as renewed</h3>
+      <div class="mb-3.5">
+        <label class="block text-[11.5px] font-bold text-muted mb-1.5 uppercase tracking-wide">New expiry date</label>
+        <input
+          type="date"
+          class="w-full border border-line bg-surface-2 text-ink rounded-[9px] px-3 py-2.5 text-[13.5px] font-sans"
+          [ngModel]="renewExpiryDate()"
+          (ngModelChange)="renewExpiryDate.set($event)"
+        />
+      </div>
+      <div class="mb-3.5">
+        <label class="block text-[11.5px] font-bold text-muted mb-1.5 uppercase tracking-wide">New document number (optional)</label>
+        <input
+          type="text"
+          class="w-full border border-line bg-surface-2 text-ink rounded-[9px] px-3 py-2.5 text-[13.5px] font-sans"
+          [ngModel]="renewDocumentNumber()"
+          (ngModelChange)="renewDocumentNumber.set($event)"
+        />
+      </div>
+      <div class="flex justify-end gap-2 mt-1">
+        <button class="border border-line bg-transparent text-ink rounded-[9px] px-4 py-2 text-[13px] font-bold" (click)="closeRenewModal()">Cancel</button>
+        <button
+          class="text-white border-0 rounded-[9px] px-4 py-2 text-[13px] font-bold disabled:opacity-50 disabled:cursor-not-allowed"
+          style="background: linear-gradient(135deg, var(--teal), var(--blue));"
+          [disabled]="!renewExpiryDate()"
+          (click)="confirmRenew()"
+        >
+          Save
+        </button>
+      </div>
+    </div>
+  </div>
+}

@@ -85,6 +85,27 @@ return [
             'report' => false,
         ],
 
+        /*
+         * T25 — generated compliance/audit report files (CSV/PDF). Same
+         * "never public, signed URL only" posture as 'attachments' above:
+         * a report can contain document numbers, renewal history, and
+         * other data that must stay behind auth + a short-lived link
+         * rather than a guessable/static path.
+         */
+        'reports' => [
+            'driver' => env('REPORTS_DRIVER', 'local'),
+            'root' => storage_path('app/reports'),
+            'key' => env('REPORTS_KEY', env('AWS_ACCESS_KEY_ID')),
+            'secret' => env('REPORTS_SECRET', env('AWS_SECRET_ACCESS_KEY')),
+            'region' => env('REPORTS_REGION', env('AWS_DEFAULT_REGION')),
+            'bucket' => env('REPORTS_BUCKET'),
+            'endpoint' => env('REPORTS_ENDPOINT'),
+            'use_path_style_endpoint' => env('REPORTS_USE_PATH_STYLE_ENDPOINT', false),
+            'visibility' => 'private',
+            'throw' => true,
+            'report' => false,
+        ],
+
     ],
 
     /*

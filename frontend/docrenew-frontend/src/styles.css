@@ -1,0 +1,47 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* DocRenew design tokens — ported from docrenew_mockups.html. Kept as
+   CSS variables (rather than flattened into tailwind.config.js) so dark
+   mode keeps working through the same :root swap; tailwind.config.js
+   maps its color palette onto these same variables via var(). */
+:root{
+  --bg:#f3f7fb; --surface:#ffffff; --surface-2:#f8fafd; --line:#dfe7f0; --ink:#0f2033; --muted:#5b6b7d;
+  --navy:#0b2545; --blue:#1d6fb8; --teal:#12a4a4; --sky:#eaf2fb;
+  --ok:#1f7a56; --ok-bg:#e1f3ea;
+  --warn:#9a6a12; --warn-bg:#fbeed9;
+  --urgent:#b4530f; --urgent-bg:#fde3d1;
+  --crit:#a23b3b; --crit-bg:#f8e0e0;
+  --idle:#5b6b7d; --idle-bg:#eceff3;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0a1626; --surface:#101f34; --surface-2:#0d1a2c; --line:#213a52; --ink:#e8f0fa; --muted:#93a7bf;
+    --navy:#d7e6f8; --blue:#6cb0ec; --teal:#52dada; --sky:#122a44;
+    --ok:#86e4bc; --ok-bg:#113526;
+    --warn:#f3cd82; --warn-bg:#3a2d10;
+    --urgent:#f5a872; --urgent-bg:#3a2411;
+    --crit:#f3a3a3; --crit-bg:#3a1818;
+    --idle:#a9b8ca; --idle-bg:#182536;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0a1626; --surface:#101f34; --surface-2:#0d1a2c; --line:#213a52; --ink:#e8f0fa; --muted:#93a7bf;
+  --navy:#d7e6f8; --blue:#6cb0ec; --teal:#52dada; --sky:#122a44;
+  --ok:#86e4bc; --ok-bg:#113526;
+  --warn:#f3cd82; --warn-bg:#3a2d10;
+  --urgent:#f5a872; --urgent-bg:#3a2411;
+  --crit:#f3a3a3; --crit-bg:#3a1818;
+  --idle:#a9b8ca; --idle-bg:#182536;
+  color-scheme: dark;
+}
+
+html, body { height: 100%; }
+body {
+  margin: 0;
+  background-color: var(--bg);
+  color: var(--ink);
+}

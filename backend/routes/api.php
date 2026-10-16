@@ -1,9 +1,14 @@
 <?php
 
 use App\Http\Controllers\Api\AttachmentController;
+use App\Http\Controllers\Api\AuditLogController;
+use App\Http\Controllers\Api\DashboardController;
 use App\Http\Controllers\Api\DocumentController;
 use App\Http\Controllers\Api\EmployeeProfileController;
 use App\Http\Controllers\Api\NotificationController;
+use App\Http\Controllers\Api\ReminderScheduleConfigController;
+use App\Http\Controllers\Api\ReportController;
+use App\Http\Controllers\Api\TenantSettingsController;
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\Auth\PasswordController;
 use Illuminate\Support\Facades\Route;
@@ -63,6 +68,10 @@ Route::middleware(['auth:sanctum', 'active'])->group(function () {
     // T23 — escalation resolution (Manager/HR only; DocumentPolicy::dismissEscalation).
     Route::post('/documents/{document}/escalation/dismiss', [DocumentController::class, 'dismissEscalation']);
 
+    // T31 — dashboard bulk actions (Admin/HR only; DocumentPolicy::reassignOwner/sendManualReminder).
+    Route::post('/documents/{document}/reassign', [DocumentController::class, 'reassignOwner']);
+    Route::post('/documents/{document}/send-reminder', [DocumentController::class, 'sendManualReminder']);
+
     // T21 — attachment upload and signed-URL issuance require a live,
     // authorized session (same as every other document action above).
     Route::post('/documents/{document}/attachment', [AttachmentController::class, 'store']);
@@ -71,6 +80,30 @@ Route::middleware(['auth:sanctum', 'active'])->group(function () {
     // T22 — reminder scheduling engine.
     Route::get('/notifications', [NotificationController::class, 'index']);
     Route::post('/notifications/scan', [NotificationController::class, 'scan']);
+
+    // T25 — compliance & audit reporting APIs (FSD 4.3 / 3.2). Download
+    // is a separate signed-URL step, same split as the attachment
+    // endpoints above (ReportController::downloadUrl mints it, stream()
+    // below serves it).
+    Route::post('/reports', [ReportController::class, 'store']);
+    Route::get('/reports/{report}', [ReportController::class, 'show']);
+    Route::get('/reports/{report}/download', [ReportController::class, 'downloadUrl']);
+
+    Route::get('/audit-logs', [AuditLogController::class, 'index']);
+
+    // T26 — Admin configuration APIs (FSD 4.5 "Configuration Management").
+    // Document types and notification templates are deliberately NOT
+    // here — the Jira task scopes this to "reminder rules, org
+    // settings" specifically, and notification template copy is T30's
+    // job.
+    Route::get('/config/reminder-schedules', [ReminderScheduleConfigController::class, 'index']);
+    Route::patch('/config/reminder-schedules', [ReminderScheduleConfigController::class, 'update']);
+
+    Route::get('/config/settings', [TenantSettingsController::class, 'show']);
+    Route::patch('/config/settings', [TenantSettingsController::class, 'update']);
+
+    // T31 — live compliance dashboard summary tiles (FSD 4.3).
+    Route::get('/dashboard/summary', [DashboardController::class, 'summary']);
 });
 
 /*
@@ -83,3 +116,11 @@ Route::middleware(['auth:sanctum', 'active'])->group(function () {
 Route::get('/attachments/{document}/stream', [AttachmentController::class, 'stream'])
     ->middleware('signed')
     ->name('attachments.stream');
+
+/*
+| T25 — the actual report download, same "signature is the only
+| credential" posture as attachments.stream above.
+*/
+Route::get('/reports/{report}/stream', [ReportController::class, 'stream'])
+    ->middleware('signed')
+    ->name('reports.stream');

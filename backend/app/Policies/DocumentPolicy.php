@@ -96,6 +96,33 @@ class DocumentPolicy
         return $this->canFullyManage($user, $document) || $this->isOwnTeamDocument($user, $document);
     }
 
+    /**
+     * T31 / FSD 4.3 bulk action "reassign owner (Admin/HR only)" — unlike
+     * dismissEscalation() above, this is deliberately Admin/HR ONLY, not
+     * also "the Manager it was escalated to." canFullyManage() alone
+     * would also be true for the document's OWNER (Employee/Manager on
+     * their own record, per FSD 3.2's "own documents: Full" for every
+     * role) — but letting an employee reassign their own document away
+     * from themselves is a different action than editing it, so this
+     * checks the role directly instead of reusing canFullyManage().
+     */
+    public function reassignOwner(User $user, Document $document): bool
+    {
+        return $document->tenant_id === $user->tenant_id && $user->role->isTenantWide();
+    }
+
+    /**
+     * T31 / FSD 4.3 bulk action "send a manual reminder" — the dashboard
+     * mockup only ever shows this button on the Admin/HR screen (the
+     * Manager/Employee dashboards are read-only, no toolbar), so this
+     * stays tenant-wide-only rather than extending to "own team" the way
+     * dismissEscalation() does.
+     */
+    public function sendManualReminder(User $user, Document $document): bool
+    {
+        return $document->tenant_id === $user->tenant_id && $user->role->isTenantWide();
+    }
+
     private function canFullyManage(User $user, Document $document): bool
     {
         if ($document->tenant_id !== $user->tenant_id) {
