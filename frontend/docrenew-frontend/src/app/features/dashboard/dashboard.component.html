@@ -10,6 +10,12 @@
     </span>
     <span class="font-display font-extrabold text-base tracking-tight">DocRenew</span>
   </div>
+  <a
+    routerLink="/employees"
+    class="text-[11.5px] font-bold text-[#cfe0f5] no-underline hover:text-white"
+  >
+    {{ auth.isTenantWide ? 'Employees' : (auth.currentUser()?.role === 'EMPLOYEE' ? 'My profile' : 'My team') }}
+  </a>
   <div class="flex-1"></div>
   @if (auth.currentUser(); as user) {
     <div class="text-xs text-[#9fc0e4] flex items-center gap-2">
@@ -28,14 +34,23 @@
 </div>
 
 <div class="px-[30px] pt-[26px] pb-[60px] max-w-[1180px] mx-auto">
-  <div class="mb-5">
-    <div class="text-[11px] font-extrabold tracking-[.14em] uppercase text-brand-teal mb-1.5">
-      {{ auth.isTenantWide ? 'COMPLIANCE' : (auth.currentUser()?.role === 'EMPLOYEE' ? 'MY DOCUMENTS' : 'MY TEAM') }} &middot; OVERVIEW
+  <div class="mb-5 flex items-start justify-between gap-4 flex-wrap">
+    <div>
+      <div class="text-[11px] font-extrabold tracking-[.14em] uppercase text-brand-teal mb-1.5">
+        {{ auth.isTenantWide ? 'COMPLIANCE' : (auth.currentUser()?.role === 'EMPLOYEE' ? 'MY DOCUMENTS' : 'MY TEAM') }} &middot; OVERVIEW
+      </div>
+      <h1 class="text-[22px] font-display font-extrabold text-navy m-0 mb-1 tracking-tight">
+        {{ auth.currentUser()?.role === 'EMPLOYEE' ? 'My Documents' : (auth.isTenantWide ? 'Compliance Dashboard' : 'Team Dashboard') }}
+      </h1>
+      <p class="text-[13.5px] text-muted m-0 max-w-[62ch]">Every tracked document in your scope, at a glance — filter, sort, or act in bulk.</p>
     </div>
-    <h1 class="text-[22px] font-display font-extrabold text-navy m-0 mb-1 tracking-tight">
-      {{ auth.currentUser()?.role === 'EMPLOYEE' ? 'My Documents' : (auth.isTenantWide ? 'Compliance Dashboard' : 'Team Dashboard') }}
-    </h1>
-    <p class="text-[13.5px] text-muted m-0 max-w-[62ch]">Every tracked document in your scope, at a glance — filter, sort, or act in bulk.</p>
+    <a
+      routerLink="/documents/new"
+      class="text-white border-0 rounded-[9px] px-4 py-2 text-[13px] font-bold inline-flex items-center gap-1.5 whitespace-nowrap no-underline"
+      style="background: linear-gradient(135deg, var(--teal), var(--blue));"
+    >
+      + Add a document
+    </a>
   </div>
 
   @if (errorMessage()) {
@@ -177,9 +192,15 @@
                   <span class="w-1.5 h-1.5 rounded-full bg-current"></span>{{ statusPresentation(doc.status).label }}
                 </span>
               </td>
-              <td class="px-3 py-2.5 border-b border-line">
+              <td class="px-3 py-2.5 border-b border-line whitespace-nowrap">
+                <a
+                  [routerLink]="['/documents', doc.id]"
+                  class="border border-line bg-transparent text-ink rounded-[9px] px-[11px] py-[5px] text-xs font-bold inline-flex items-center gap-1.5 no-underline"
+                >
+                  View
+                </a>
                 <button
-                  class="bg-brand-sky text-navy border-0 rounded-[9px] px-[11px] py-[5px] text-xs font-bold inline-flex items-center gap-1.5"
+                  class="bg-brand-sky text-navy border-0 rounded-[9px] px-[11px] py-[5px] text-xs font-bold inline-flex items-center gap-1.5 ml-1.5"
                   (click)="openRenewModal(doc)"
                 >
                   Renew

@@ -1,0 +1,258 @@
+<div
+  class="flex items-center gap-4 px-5 py-3 text-[#eaf3ff] sticky top-0 z-20 flex-wrap"
+  style="background: linear-gradient(135deg, var(--navy), #123a63 70%);"
+>
+  <a routerLink="/dashboard" class="flex items-center gap-2.5 mr-2 text-white no-underline">
+    <span class="w-[30px] h-[30px] rounded-[9px] grid place-items-center text-white" style="background: linear-gradient(135deg, var(--teal), var(--blue));">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-[17px] h-[17px]">
+        <path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
+      </svg>
+    </span>
+    <span class="font-display font-extrabold text-base tracking-tight">DocRenew</span>
+  </a>
+  <div class="flex-1"></div>
+  <a routerLink="/dashboard" class="text-[11.5px] font-bold text-[#cfe0f5] no-underline hover:text-white">&larr; Back to dashboard</a>
+</div>
+
+<div class="px-[30px] pt-[26px] pb-[60px] max-w-[760px] mx-auto">
+  @if (loading()) {
+    <p class="text-muted text-[13.5px]">Loading…</p>
+  } @else if (errorMessage() && !doc()) {
+    <div class="border-l-[3px] border-urgent bg-urgent-bg rounded-[10px] px-4 py-3 text-[12.5px] text-ink">{{ errorMessage() }}</div>
+  } @else {
+  @if (doc(); as d) {
+    <div class="mb-5">
+      <div class="text-[11px] font-extrabold tracking-[.14em] uppercase text-brand-teal mb-1.5">DOCUMENT DETAIL</div>
+      <h1 class="text-[22px] font-display font-extrabold text-navy m-0 mb-1 tracking-tight">
+        {{ d.document_type }}@if (d.item_label) { &nbsp;— {{ d.item_label }} }
+      </h1>
+      <span class="inline-flex items-center gap-1.5 text-[11px] font-bold px-2.5 py-1 rounded-pill whitespace-nowrap" [class]="pillClasses()">
+        <span class="w-1.5 h-1.5 rounded-full bg-current"></span>{{ statusPresentation().label }}
+      </span>
+    </div>
+
+    @if (actionMessage()) {
+      <div class="border-l-[3px] border-brand-teal bg-brand-sky rounded-[10px] px-4 py-3 text-[12.5px] text-ink mb-4">{{ actionMessage() }}</div>
+    }
+    @if (errorMessage()) {
+      <div class="border-l-[3px] border-urgent bg-urgent-bg rounded-[10px] px-4 py-3 text-[12.5px] text-ink mb-4">{{ errorMessage() }}</div>
+    }
+
+    <!-- View mode -->
+    @if (!editing()) {
+      <div class="bg-surface border border-line rounded-card px-5 py-5 mb-4">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-3.5">
+          <div>
+            <div class="text-[11.5px] font-bold text-muted mb-1 uppercase tracking-wide">Document number</div>
+            <div class="flex items-center gap-2">
+              <span class="text-[13.5px]">{{ revealedNumber() ?? d.document_number_masked ?? '—' }}</span>
+              @if (d.document_number_masked) {
+                <button
+                  class="text-[11px] font-bold text-brand-blue disabled:opacity-50"
+                  [disabled]="revealing()"
+                  (click)="toggleReveal()"
+                >
+                  {{ revealedNumber() ? 'Hide' : (revealing() ? 'Revealing…' : 'Reveal') }}
+                </button>
+              }
+            </div>
+          </div>
+          <div>
+            <div class="text-[11.5px] font-bold text-muted mb-1 uppercase tracking-wide">Issue date</div>
+            <div class="text-[13.5px]">{{ d.issue_date ?? '—' }}</div>
+          </div>
+          <div>
+            <div class="text-[11.5px] font-bold text-muted mb-1 uppercase tracking-wide">Expiry date</div>
+            <div class="text-[13.5px]">{{ d.expiry_date }}</div>
+          </div>
+          <div>
+            <div class="text-[11.5px] font-bold text-muted mb-1 uppercase tracking-wide">Last renewed</div>
+            <div class="text-[13.5px]">{{ d.last_renewed_at ?? 'Never' }}</div>
+          </div>
+        </div>
+
+        @if (canManage()) {
+          <div class="mt-5 flex items-center gap-2 flex-wrap">
+            <button
+              class="text-white border-0 rounded-[9px] px-4 py-2 text-[13px] font-bold"
+              style="background: linear-gradient(135deg, var(--teal), var(--blue));"
+              (click)="openRenew()"
+            >
+              Mark as renewed
+            </button>
+            <button class="bg-brand-sky text-navy border-0 rounded-[9px] px-4 py-2 text-[13px] font-bold" (click)="startEditing()">
+              Edit details
+            </button>
+            @if (!deleteConfirmOpen()) {
+              <button class="border border-line bg-transparent text-ink rounded-[9px] px-4 py-2 text-[13px] font-bold ml-auto" (click)="deleteConfirmOpen.set(true)">
+                Delete
+              </button>
+            } @else {
+              <span class="text-[12.5px] text-ink ml-auto">Delete this document permanently?</span>
+              <button class="border border-line bg-transparent text-ink rounded-[9px] px-3 py-2 text-[13px] font-bold" (click)="deleteConfirmOpen.set(false)">
+                Cancel
+              </button>
+              <button
+                class="bg-urgent text-white border-0 rounded-[9px] px-3 py-2 text-[13px] font-bold disabled:opacity-60"
+                [disabled]="deleting()"
+                (click)="confirmDelete()"
+              >
+                {{ deleting() ? 'Deleting…' : 'Yes, delete' }}
+              </button>
+            }
+          </div>
+        }
+      </div>
+    }
+
+    <!-- Edit mode -->
+    @if (editing()) {
+      <div class="bg-surface border border-line rounded-card px-5 py-5 mb-4">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-3.5">
+          <div>
+            <label class="block text-[11.5px] font-bold text-muted mb-1.5 uppercase tracking-wide">Document type</label>
+            <select
+              class="w-full border border-line bg-surface-2 text-ink rounded-[9px] px-3 py-2.5 text-[13.5px] font-sans"
+              [ngModel]="editDocumentTypeId()"
+              (ngModelChange)="editDocumentTypeId.set($event)"
+            >
+              @for (t of documentTypes(); track t.id) {
+                <option [value]="t.id">{{ t.name }}</option>
+              }
+            </select>
+          </div>
+          <div>
+            <label class="block text-[11.5px] font-bold text-muted mb-1.5 uppercase tracking-wide">Item label</label>
+            <input
+              type="text"
+              class="w-full border border-line bg-surface-2 text-ink rounded-[9px] px-3 py-2.5 text-[13.5px] font-sans"
+              [ngModel]="editItemLabel()"
+              (ngModelChange)="editItemLabel.set($event)"
+            />
+          </div>
+          <div>
+            <label class="block text-[11.5px] font-bold text-muted mb-1.5 uppercase tracking-wide">New document number</label>
+            <input
+              type="text"
+              placeholder="leave blank to keep current"
+              class="w-full border border-line bg-surface-2 text-ink rounded-[9px] px-3 py-2.5 text-[13.5px] font-sans"
+              [ngModel]="editDocumentNumber()"
+              (ngModelChange)="editDocumentNumber.set($event)"
+            />
+          </div>
+          <div>
+            <label class="block text-[11.5px] font-bold text-muted mb-1.5 uppercase tracking-wide">Issue date</label>
+            <input
+              type="date"
+              class="w-full border border-line bg-surface-2 text-ink rounded-[9px] px-3 py-2.5 text-[13.5px] font-sans"
+              [ngModel]="editIssueDate()"
+              (ngModelChange)="editIssueDate.set($event)"
+            />
+          </div>
+          <div>
+            <label class="block text-[11.5px] font-bold text-muted mb-1.5 uppercase tracking-wide">Expiry date</label>
+            <input
+              type="date"
+              class="w-full border border-line bg-surface-2 text-ink rounded-[9px] px-3 py-2.5 text-[13.5px] font-sans"
+              [ngModel]="editExpiryDate()"
+              (ngModelChange)="editExpiryDate.set($event)"
+            />
+          </div>
+        </div>
+        <div class="mt-5 flex items-center gap-2">
+          <button
+            class="text-white border-0 rounded-[9px] px-4 py-2 text-[13px] font-bold disabled:opacity-60"
+            style="background: linear-gradient(135deg, var(--teal), var(--blue));"
+            [disabled]="saving()"
+            (click)="saveEdit()"
+          >
+            {{ saving() ? 'Saving…' : 'Save changes' }}
+          </button>
+          <button class="border border-line bg-transparent text-ink rounded-[9px] px-4 py-2 text-[13px] font-bold" (click)="cancelEditing()">
+            Cancel
+          </button>
+        </div>
+      </div>
+    }
+
+    <!-- Attachment -->
+    <div class="bg-surface border border-line rounded-card px-5 py-5">
+      <div class="text-[11.5px] font-extrabold text-muted mb-3 uppercase tracking-wide">Attachment</div>
+
+      @if (d.attachment) {
+        <div class="flex items-center justify-between flex-wrap gap-3">
+          <div>
+            <div class="text-[13.5px] font-semibold text-ink">{{ d.attachment.file_name }}</div>
+            <div class="text-[12px] text-muted">{{ d.attachment.mime_type }} &middot; {{ formatBytes(d.attachment.size_bytes) }}</div>
+          </div>
+          <button
+            class="bg-brand-sky text-navy border-0 rounded-[9px] px-4 py-2 text-[13px] font-bold disabled:opacity-60"
+            [disabled]="downloadingAttachment()"
+            (click)="downloadAttachment()"
+          >
+            {{ downloadingAttachment() ? 'Preparing…' : 'Download' }}
+          </button>
+        </div>
+      } @else {
+        <p class="text-[12.5px] text-muted mb-0">No attachment uploaded yet.</p>
+      }
+
+      @if (canManage()) {
+        <div class="mt-4 pt-4 border-t border-line">
+          <label class="block text-[11.5px] font-bold text-muted mb-1.5 uppercase tracking-wide">
+            {{ d.attachment ? 'Replace attachment' : 'Upload attachment' }}
+          </label>
+          <input
+            type="file"
+            accept=".pdf,.jpg,.jpeg,.png"
+            [disabled]="uploading()"
+            (change)="onFileSelected($event)"
+            class="text-[13px]"
+          />
+          <p class="text-[11.5px] text-muted mt-1.5">PDF, JPG or PNG, up to 10 MB. Scanned for viruses before it's stored.</p>
+          @if (uploading()) {
+            <p class="text-[12.5px] text-brand-blue mt-1.5">Uploading…</p>
+          }
+        </div>
+      }
+    </div>
+  }
+  }
+</div>
+
+@if (renewOpen()) {
+  <div class="fixed inset-0 bg-[rgba(5,15,30,.45)] flex items-center justify-center z-50" (click)="closeRenew()">
+    <div class="bg-surface rounded-card px-6 py-5.5 w-full max-w-[380px] shadow-[0_30px_80px_rgba(5,15,30,.35)]" (click)="$event.stopPropagation()">
+      <h3 class="m-0 mb-3.5 text-navy text-base font-display font-bold">Mark as renewed</h3>
+      <div class="mb-3.5">
+        <label class="block text-[11.5px] font-bold text-muted mb-1.5 uppercase tracking-wide">New expiry date</label>
+        <input
+          type="date"
+          class="w-full border border-line bg-surface-2 text-ink rounded-[9px] px-3 py-2.5 text-[13.5px] font-sans"
+          [ngModel]="renewExpiryDate()"
+          (ngModelChange)="renewExpiryDate.set($event)"
+        />
+      </div>
+      <div class="mb-3.5">
+        <label class="block text-[11.5px] font-bold text-muted mb-1.5 uppercase tracking-wide">New document number (optional)</label>
+        <input
+          type="text"
+          class="w-full border border-line bg-surface-2 text-ink rounded-[9px] px-3 py-2.5 text-[13.5px] font-sans"
+          [ngModel]="renewDocumentNumber()"
+          (ngModelChange)="renewDocumentNumber.set($event)"
+        />
+      </div>
+      <div class="flex justify-end gap-2 mt-1">
+        <button class="border border-line bg-transparent text-ink rounded-[9px] px-4 py-2 text-[13px] font-bold" (click)="closeRenew()">Cancel</button>
+        <button
+          class="text-white border-0 rounded-[9px] px-4 py-2 text-[13px] font-bold disabled:opacity-50 disabled:cursor-not-allowed"
+          style="background: linear-gradient(135deg, var(--teal), var(--blue));"
+          [disabled]="!renewExpiryDate() || renewing()"
+          (click)="confirmRenew()"
+        >
+          {{ renewing() ? 'Saving…' : 'Save' }}
+        </button>
+      </div>
+    </div>
+  </div>
+}

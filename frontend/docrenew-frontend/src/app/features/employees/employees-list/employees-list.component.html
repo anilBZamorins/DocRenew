@@ -1,0 +1,142 @@
+<div
+  class="flex items-center gap-4 px-5 py-3 text-[#eaf3ff] sticky top-0 z-20 flex-wrap"
+  style="background: linear-gradient(135deg, var(--navy), #123a63 70%);"
+>
+  <a routerLink="/dashboard" class="flex items-center gap-2.5 mr-2 text-white no-underline">
+    <span class="w-[30px] h-[30px] rounded-[9px] grid place-items-center text-white" style="background: linear-gradient(135deg, var(--teal), var(--blue));">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-[17px] h-[17px]">
+        <path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
+      </svg>
+    </span>
+    <span class="font-display font-extrabold text-base tracking-tight">DocRenew</span>
+  </a>
+  <div class="flex-1"></div>
+  <a routerLink="/dashboard" class="text-[11.5px] font-bold text-[#cfe0f5] no-underline hover:text-white">&larr; Back to dashboard</a>
+</div>
+
+<div class="px-[30px] pt-[26px] pb-[60px] max-w-[1100px] mx-auto">
+  <div class="mb-5 flex items-start justify-between gap-4 flex-wrap">
+    <div>
+      <div class="text-[11px] font-extrabold tracking-[.14em] uppercase text-brand-teal mb-1.5">
+        {{ auth.isTenantWide ? 'HR' : 'MANAGER' }} &middot; PEOPLE
+      </div>
+      <h1 class="text-[22px] font-display font-extrabold text-navy m-0 mb-1 tracking-tight">
+        {{ auth.isTenantWide ? 'Employee Profiles' : 'My Team' }}
+      </h1>
+      <p class="text-[13.5px] text-muted m-0 max-w-[62ch]">
+        {{ auth.isTenantWide ? 'Create and manage the employee records that documents are tracked against.' : 'The people on your team and the profile details DocRenew keeps for them.' }}
+      </p>
+    </div>
+    @if (auth.isTenantWide) {
+      <a
+        routerLink="/employees/new"
+        class="text-white border-0 rounded-[9px] px-4 py-2 text-[13px] font-bold inline-flex items-center gap-1.5 whitespace-nowrap no-underline"
+        style="background: linear-gradient(135deg, var(--teal), var(--blue));"
+      >
+        + Add employee
+      </a>
+    }
+  </div>
+
+  @if (errorMessage()) {
+    <div class="border-l-[3px] border-urgent bg-urgent-bg rounded-[10px] px-4 py-3 text-[12.5px] text-ink mb-4">{{ errorMessage() }}</div>
+  }
+
+  <div class="flex items-center gap-2.5 mb-3.5 flex-wrap">
+    <input
+      type="text"
+      placeholder="Search name, code, or email…"
+      class="border border-line bg-surface text-ink rounded-[9px] px-3 py-2 text-[13px] flex-1 max-w-[260px]"
+      [ngModel]="search()"
+      (ngModelChange)="search.set($event)"
+    />
+    @if (departments().length) {
+      <select
+        class="border border-line bg-surface text-ink rounded-[9px] px-3 py-2 text-[13px]"
+        [ngModel]="departmentFilter()"
+        (ngModelChange)="departmentFilter.set($event)"
+      >
+        <option value="">All departments</option>
+        @for (d of departments(); track d) {
+          <option [value]="d">{{ d }}</option>
+        }
+      </select>
+    }
+    <select
+      class="border border-line bg-surface text-ink rounded-[9px] px-3 py-2 text-[13px]"
+      [ngModel]="activeFilter()"
+      (ngModelChange)="activeFilter.set($event)"
+    >
+      <option value="active">Active</option>
+      <option value="inactive">Deactivated</option>
+      <option value="all">All</option>
+    </select>
+  </div>
+
+  @if (loading()) {
+    <p class="text-muted text-[13.5px]">Loading…</p>
+  } @else {
+    <div class="tbl-card bg-surface border border-line rounded-card overflow-hidden">
+      <table class="w-full border-collapse text-[13px]">
+        <thead>
+          <tr class="bg-surface-2 text-left">
+            <th class="px-3 py-2.5 font-bold text-muted text-[11px] uppercase tracking-wide">Name</th>
+            <th class="px-3 py-2.5 font-bold text-muted text-[11px] uppercase tracking-wide">Department</th>
+            <th class="px-3 py-2.5 font-bold text-muted text-[11px] uppercase tracking-wide">Manager</th>
+            <th class="px-3 py-2.5 font-bold text-muted text-[11px] uppercase tracking-wide">Contact</th>
+            <th class="px-3 py-2.5 font-bold text-muted text-[11px] uppercase tracking-wide">Account</th>
+            <th class="px-3 py-2.5 font-bold text-muted text-[11px] uppercase tracking-wide">Status</th>
+            <th class="px-3 py-2.5"></th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (p of filteredProfiles(); track p.id) {
+            <tr class="border-b border-line last:border-b-0 hover:bg-surface-2/60">
+              <td class="px-3 py-2.5">
+                <div class="flex items-center gap-2">
+                  <span class="w-[26px] h-[26px] rounded-full bg-brand-sky text-navy grid place-items-center font-extrabold text-[11px]">
+                    {{ initials(p.name) }}
+                  </span>
+                  <span class="font-semibold text-ink">{{ p.name }}</span>
+                  @if (p.employee_code) {
+                    <span class="text-muted text-[11.5px]">&middot; {{ p.employee_code }}</span>
+                  }
+                </div>
+              </td>
+              <td class="px-3 py-2.5 text-ink">{{ p.department ?? '—' }}</td>
+              <td class="px-3 py-2.5 text-ink">{{ managerName(p.manager_id) }}</td>
+              <td class="px-3 py-2.5 text-ink">{{ p.contact_email ?? '—' }}</td>
+              <td class="px-3 py-2.5">
+                <span class="inline-flex items-center gap-1.5 text-[11px] font-bold px-2.5 py-1 rounded-pill whitespace-nowrap bg-ok-bg text-ok">
+                  <span class="w-1.5 h-1.5 rounded-full bg-current"></span>
+                  {{ p.has_user_account ? 'Linked' : 'No login' }}
+                </span>
+              </td>
+              <td class="px-3 py-2.5">
+                <span
+                  class="inline-flex items-center gap-1.5 text-[11px] font-bold px-2.5 py-1 rounded-pill whitespace-nowrap"
+                  [class]="p.active ? 'bg-ok-bg text-ok' : 'bg-idle-bg text-idle'"
+                >
+                  <span class="w-1.5 h-1.5 rounded-full bg-current"></span>
+                  {{ p.active ? 'Active' : 'Deactivated' }}
+                </span>
+              </td>
+              <td class="px-3 py-2.5 whitespace-nowrap">
+                <a
+                  [routerLink]="['/employees', p.id]"
+                  class="border border-line bg-transparent text-ink rounded-[9px] px-[11px] py-[5px] text-xs font-bold inline-flex items-center gap-1.5 no-underline"
+                >
+                  {{ auth.isTenantWide ? 'Edit' : 'View' }}
+                </a>
+              </td>
+            </tr>
+          } @empty {
+            <tr>
+              <td colspan="7" class="px-3 py-6 text-center text-muted text-[13px]">No employees match these filters.</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</div>

@@ -1,0 +1,233 @@
+<div
+  class="flex items-center gap-4 px-5 py-3 text-[#eaf3ff] sticky top-0 z-20 flex-wrap"
+  style="background: linear-gradient(135deg, var(--navy), #123a63 70%);"
+>
+  <a routerLink="/dashboard" class="flex items-center gap-2.5 mr-2 text-white no-underline">
+    <span class="w-[30px] h-[30px] rounded-[9px] grid place-items-center text-white" style="background: linear-gradient(135deg, var(--teal), var(--blue));">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-[17px] h-[17px]">
+        <path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
+      </svg>
+    </span>
+    <span class="font-display font-extrabold text-base tracking-tight">DocRenew</span>
+  </a>
+  <div class="flex-1"></div>
+  <a routerLink="/employees" class="text-[11.5px] font-bold text-[#cfe0f5] no-underline hover:text-white">&larr; Back to employees</a>
+</div>
+
+<div class="px-[30px] pt-[26px] pb-[60px] max-w-[760px] mx-auto">
+  @if (loading()) {
+    <p class="text-muted text-[13.5px]">Loading…</p>
+  } @else if (errorMessage() && !profile()) {
+    <div class="border-l-[3px] border-urgent bg-urgent-bg rounded-[10px] px-4 py-3 text-[12.5px] text-ink">{{ errorMessage() }}</div>
+  } @else {
+  @if (profile(); as p) {
+    <div class="mb-5">
+      <div class="text-[11px] font-extrabold tracking-[.14em] uppercase text-brand-teal mb-1.5">
+        {{ isOwnProfile() ? 'MY PROFILE' : 'EMPLOYEE PROFILE' }}
+      </div>
+      <h1 class="text-[22px] font-display font-extrabold text-navy m-0 mb-1 tracking-tight">{{ p.name }}</h1>
+      <span
+        class="inline-flex items-center gap-1.5 text-[11px] font-bold px-2.5 py-1 rounded-pill whitespace-nowrap"
+        [class]="p.active ? 'bg-ok-bg text-ok' : 'bg-idle-bg text-idle'"
+      >
+        <span class="w-1.5 h-1.5 rounded-full bg-current"></span>
+        {{ p.active ? 'Active' : 'Deactivated' }}
+      </span>
+    </div>
+
+    @if (actionMessage()) {
+      <div class="border-l-[3px] border-brand-teal bg-brand-sky rounded-[10px] px-4 py-3 text-[12.5px] text-ink mb-4">{{ actionMessage() }}</div>
+    }
+    @if (errorMessage()) {
+      <div class="border-l-[3px] border-urgent bg-urgent-bg rounded-[10px] px-4 py-3 text-[12.5px] text-ink mb-4">{{ errorMessage() }}</div>
+    }
+
+    <!-- View mode -->
+    @if (!editing()) {
+      <div class="bg-surface border border-line rounded-card px-5 py-5 mb-4">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-3.5">
+          <div>
+            <div class="text-[11.5px] font-bold text-muted mb-1 uppercase tracking-wide">Employee ID</div>
+            <div class="text-[13.5px]">{{ p.employee_code ?? '—' }}</div>
+          </div>
+          <div>
+            <div class="text-[11.5px] font-bold text-muted mb-1 uppercase tracking-wide">Department</div>
+            <div class="text-[13.5px]">{{ p.department ?? '—' }}</div>
+          </div>
+          <div>
+            <div class="text-[11.5px] font-bold text-muted mb-1 uppercase tracking-wide">Job title</div>
+            <div class="text-[13.5px]">{{ p.job_title ?? '—' }}</div>
+          </div>
+          <div>
+            <div class="text-[11.5px] font-bold text-muted mb-1 uppercase tracking-wide">Manager</div>
+            <div class="text-[13.5px]">{{ managerName(p.manager_id) }}</div>
+          </div>
+          <div>
+            <div class="text-[11.5px] font-bold text-muted mb-1 uppercase tracking-wide">Contact email</div>
+            <div class="text-[13.5px]">{{ p.contact_email ?? '—' }}</div>
+          </div>
+          <div>
+            <div class="text-[11.5px] font-bold text-muted mb-1 uppercase tracking-wide">Contact phone</div>
+            <div class="text-[13.5px]">{{ p.contact_phone ?? '—' }}</div>
+          </div>
+          <div>
+            <div class="text-[11.5px] font-bold text-muted mb-1 uppercase tracking-wide">Sign-in account</div>
+            <div class="text-[13.5px]">{{ p.has_user_account ? 'Linked' : 'Not linked yet' }}</div>
+          </div>
+        </div>
+
+        @if (canEdit() || auth.isTenantWide) {
+          <div class="mt-5 flex items-center gap-2 flex-wrap">
+            @if (canEdit()) {
+              <button class="bg-brand-sky text-navy border-0 rounded-[9px] px-4 py-2 text-[13px] font-bold" (click)="startEditing()">
+                Edit {{ editScope() === 'contact' ? 'contact details' : 'details' }}
+              </button>
+            }
+            @if (auth.isTenantWide) {
+              @if (p.active) {
+                @if (!deactivateConfirmOpen()) {
+                  <button class="border border-line bg-transparent text-ink rounded-[9px] px-4 py-2 text-[13px] font-bold ml-auto" (click)="deactivateConfirmOpen.set(true)">
+                    Deactivate
+                  </button>
+                } @else {
+                  <span class="text-[12.5px] text-ink ml-auto">Deactivate this employee? Their account will be suspended; history is kept.</span>
+                  <button class="border border-line bg-transparent text-ink rounded-[9px] px-3 py-2 text-[13px] font-bold" (click)="deactivateConfirmOpen.set(false)">
+                    Cancel
+                  </button>
+                  <button
+                    class="bg-urgent text-white border-0 rounded-[9px] px-3 py-2 text-[13px] font-bold disabled:opacity-60"
+                    [disabled]="deactivating()"
+                    (click)="confirmDeactivate()"
+                  >
+                    {{ deactivating() ? 'Deactivating…' : 'Yes, deactivate' }}
+                  </button>
+                }
+              } @else {
+                <button
+                  class="bg-brand-teal text-[#06241f] border-0 rounded-[9px] px-4 py-2 text-[13px] font-bold ml-auto disabled:opacity-60"
+                  [disabled]="deactivating()"
+                  (click)="reactivate()"
+                >
+                  {{ deactivating() ? 'Reactivating…' : 'Reactivate' }}
+                </button>
+              }
+            }
+          </div>
+        }
+      </div>
+    }
+
+    <!-- Edit mode -->
+    @if (editing()) {
+      <div class="bg-surface border border-line rounded-card px-5 py-5 mb-4">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-3.5">
+          <div>
+            <label class="block text-[11.5px] font-bold text-muted mb-1.5 uppercase tracking-wide">Full name</label>
+            @if (editScope() === 'full') {
+              <input
+                type="text"
+                class="w-full border border-line bg-surface-2 text-ink rounded-[9px] px-3 py-2.5 text-[13.5px] font-sans"
+                [ngModel]="editName()"
+                (ngModelChange)="editName.set($event)"
+              />
+            } @else {
+              <div class="w-full border border-line bg-surface-2 text-muted rounded-[9px] px-3 py-2.5 text-[13.5px]">{{ p.name }}</div>
+            }
+          </div>
+          <div>
+            <label class="block text-[11.5px] font-bold text-muted mb-1.5 uppercase tracking-wide">Employee ID</label>
+            @if (editScope() === 'full') {
+              <input
+                type="text"
+                class="w-full border border-line bg-surface-2 text-ink rounded-[9px] px-3 py-2.5 text-[13.5px] font-sans"
+                [ngModel]="editEmployeeCode()"
+                (ngModelChange)="editEmployeeCode.set($event)"
+              />
+            } @else {
+              <div class="w-full border border-line bg-surface-2 text-muted rounded-[9px] px-3 py-2.5 text-[13.5px]">{{ p.employee_code ?? '—' }}</div>
+            }
+          </div>
+          <div>
+            <label class="block text-[11.5px] font-bold text-muted mb-1.5 uppercase tracking-wide">Department</label>
+            @if (editScope() === 'full') {
+              <input
+                type="text"
+                class="w-full border border-line bg-surface-2 text-ink rounded-[9px] px-3 py-2.5 text-[13.5px] font-sans"
+                [ngModel]="editDepartment()"
+                (ngModelChange)="editDepartment.set($event)"
+              />
+            } @else {
+              <div class="w-full border border-line bg-surface-2 text-muted rounded-[9px] px-3 py-2.5 text-[13.5px]">{{ p.department ?? '—' }}</div>
+            }
+          </div>
+          <div>
+            <label class="block text-[11.5px] font-bold text-muted mb-1.5 uppercase tracking-wide">Job title</label>
+            @if (editScope() === 'full') {
+              <input
+                type="text"
+                class="w-full border border-line bg-surface-2 text-ink rounded-[9px] px-3 py-2.5 text-[13.5px] font-sans"
+                [ngModel]="editJobTitle()"
+                (ngModelChange)="editJobTitle.set($event)"
+              />
+            } @else {
+              <div class="w-full border border-line bg-surface-2 text-muted rounded-[9px] px-3 py-2.5 text-[13.5px]">{{ p.job_title ?? '—' }}</div>
+            }
+          </div>
+          <div>
+            <label class="block text-[11.5px] font-bold text-muted mb-1.5 uppercase tracking-wide">Manager</label>
+            @if (editScope() === 'full') {
+              <select
+                class="w-full border border-line bg-surface-2 text-ink rounded-[9px] px-3 py-2.5 text-[13.5px] font-sans"
+                [ngModel]="editManagerId()"
+                (ngModelChange)="editManagerId.set($event)"
+              >
+                <option value="">No manager</option>
+                @for (m of managers(); track m.id) {
+                  <option [value]="m.id">{{ m.name }}</option>
+                }
+              </select>
+            } @else {
+              <div class="w-full border border-line bg-surface-2 text-muted rounded-[9px] px-3 py-2.5 text-[13.5px]">{{ managerName(p.manager_id) }}</div>
+            }
+          </div>
+          <div></div>
+          <div>
+            <label class="block text-[11.5px] font-bold text-muted mb-1.5 uppercase tracking-wide">Contact email</label>
+            <input
+              type="email"
+              class="w-full border border-line bg-surface-2 text-ink rounded-[9px] px-3 py-2.5 text-[13.5px] font-sans"
+              [ngModel]="editContactEmail()"
+              (ngModelChange)="editContactEmail.set($event)"
+            />
+          </div>
+          <div>
+            <label class="block text-[11.5px] font-bold text-muted mb-1.5 uppercase tracking-wide">Contact phone</label>
+            <input
+              type="text"
+              class="w-full border border-line bg-surface-2 text-ink rounded-[9px] px-3 py-2.5 text-[13.5px] font-sans"
+              [ngModel]="editContactPhone()"
+              (ngModelChange)="editContactPhone.set($event)"
+            />
+          </div>
+        </div>
+        @if (editScope() === 'contact') {
+          <p class="text-[11.5px] text-muted mt-3">You can update your contact details here. Other fields are managed by HR/Admin.</p>
+        }
+        <div class="mt-5 flex items-center gap-2">
+          <button
+            class="text-white border-0 rounded-[9px] px-4 py-2 text-[13px] font-bold disabled:opacity-60"
+            style="background: linear-gradient(135deg, var(--teal), var(--blue));"
+            [disabled]="saving()"
+            (click)="saveEdit()"
+          >
+            {{ saving() ? 'Saving…' : 'Save changes' }}
+          </button>
+          <button class="border border-line bg-transparent text-ink rounded-[9px] px-4 py-2 text-[13px] font-bold" (click)="cancelEditing()">
+            Cancel
+          </button>
+        </div>
+      </div>
+    }
+  }
+  }
+</div>

@@ -20,6 +20,27 @@ export interface EmployeeProfile {
   contact_email: string | null;
   contact_phone: string | null;
   active: boolean;
+  // Only present on EmployeeProfileController::show() (eager-loaded there,
+  // not on index()) — T33's list view hydrates it client-side instead.
+  has_user_account?: boolean;
+  created_at?: string;
+  updated_at?: string;
+}
+
+/**
+ * T33 — payload for EmployeeProfileController::store()/update(). Every
+ * field is optional because UpdateEmployeeProfileRequest narrows what an
+ * Employee may send (contact_email/contact_phone only) — the form only
+ * includes the fields the acting role is allowed to edit.
+ */
+export interface EmployeeProfileFormPayload {
+  name?: string;
+  employee_code?: string | null;
+  department?: string | null;
+  job_title?: string | null;
+  manager_id?: string | null;
+  contact_email?: string | null;
+  contact_phone?: string | null;
 }
 
 export interface DashboardSummary {
@@ -65,4 +86,25 @@ export interface DocumentFilters {
   document_type_id?: string | '';
   search?: string;
   employee_profile_id?: string;
+}
+
+export type DocumentCategory = 'EMPLOYEE_DOCUMENT' | 'EXTENDED_ITEM';
+
+export interface DocumentType {
+  id: string;
+  name: string;
+  category: DocumentCategory;
+  sort_order: number;
+  retired: boolean;
+}
+
+/** Payload shape for both create (StoreDocumentRequest) and edit (UpdateDocumentRequest). */
+export interface DocumentFormPayload {
+  employee_profile_id?: string | null;
+  document_type_id: string;
+  category?: DocumentCategory;
+  item_label?: string | null;
+  document_number?: string | null;
+  issue_date?: string | null;
+  expiry_date: string;
 }

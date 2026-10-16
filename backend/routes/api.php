@@ -4,6 +4,7 @@ use App\Http\Controllers\Api\AttachmentController;
 use App\Http\Controllers\Api\AuditLogController;
 use App\Http\Controllers\Api\DashboardController;
 use App\Http\Controllers\Api\DocumentController;
+use App\Http\Controllers\Api\DocumentTypeController;
 use App\Http\Controllers\Api\EmployeeProfileController;
 use App\Http\Controllers\Api\NotificationController;
 use App\Http\Controllers\Api\ReminderScheduleConfigController;
@@ -48,6 +49,9 @@ Route::prefix('auth')->group(function () {
 |--------------------------------------------------------------------------
 */
 Route::middleware(['auth:sanctum', 'active'])->group(function () {
+    // T32 — read-only type catalog, used by the document create/edit form.
+    Route::get('/document-types', [DocumentTypeController::class, 'index']);
+
     Route::get('/employee-profiles', [EmployeeProfileController::class, 'index']);
     Route::post('/employee-profiles', [EmployeeProfileController::class, 'store']);
     Route::get('/employee-profiles/{employee_profile}', [EmployeeProfileController::class, 'show']);

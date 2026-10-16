@@ -1,8 +1,10 @@
 import { Component, OnInit, computed, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { RouterLink } from '@angular/router';
 import { AuthService } from '../../core/auth.service';
 import { DashboardService } from './dashboard.service';
+import { DocumentsService } from '../documents/documents.service';
 import { DashboardSummary, DocumentFilters, DocumentRecord, DocumentStatus, EmployeeProfile } from '../../core/models';
 
 interface StatusPresentation {
@@ -51,7 +53,7 @@ const TILE_NUMBER_TONE_CLASSES: Record<StatusPresentation['tone'], string> = {
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, RouterLink],
   templateUrl: './dashboard.component.html',
   styleUrl: './dashboard.component.css',
 })
@@ -116,6 +118,7 @@ export class DashboardComponent implements OnInit {
   constructor(
     readonly auth: AuthService,
     private readonly dashboardService: DashboardService,
+    private readonly documentsService: DocumentsService,
   ) {}
 
   ngOnInit(): void {
@@ -305,7 +308,7 @@ export class DashboardComponent implements OnInit {
     const expiry = this.renewExpiryDate();
     if (!docId || !expiry) return;
 
-    this.dashboardService.renewDocument(docId, expiry, this.renewDocumentNumber() || undefined).subscribe({
+    this.documentsService.renewDocument(docId, expiry, this.renewDocumentNumber() || undefined).subscribe({
       next: () => {
         this.actionMessage.set('Document renewed.');
         this.closeRenewModal();

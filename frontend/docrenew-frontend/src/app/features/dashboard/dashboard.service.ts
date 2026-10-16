@@ -43,9 +43,7 @@ export class DashboardService {
     );
   }
 
-  renewDocument(documentId: string, expiryDate: string, documentNumber?: string): Observable<{ data: DocumentRecord }> {
-    const payload: Record<string, string> = { expiry_date: expiryDate };
-    if (documentNumber) payload['document_number'] = documentNumber;
-    return this.http.post<{ data: DocumentRecord }>(`${environment.apiUrl}/documents/${documentId}/renew`, payload);
-  }
+  // renewDocument moved to DocumentsService (T32) — the document
+  // detail/edit screen needs it too, so it now lives alongside the
+  // rest of the document CRUD calls rather than being duplicated here.
 }
