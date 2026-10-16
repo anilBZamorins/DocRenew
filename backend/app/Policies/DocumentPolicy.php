@@ -79,6 +79,23 @@ class DocumentPolicy
         return $this->view($user, $document);
     }
 
+    /**
+     * T23 — FSD "Escalation flow": "Manager/HR resolves by renewing the
+     * document or dismissing the escalation." Admin/HR tenant-wide, or
+     * the Manager it was actually escalated to (their own document, or a
+     * direct report's) — NOT an arbitrary Manager elsewhere in the org,
+     * and not a plain Employee (an employee dismissing their own
+     * escalation would defeat the point of escalating past them).
+     */
+    public function dismissEscalation(User $user, Document $document): bool
+    {
+        if ($user->role === UserRole::Employee) {
+            return false;
+        }
+
+        return $this->canFullyManage($user, $document) || $this->isOwnTeamDocument($user, $document);
+    }
+
     private function canFullyManage(User $user, Document $document): bool
     {
         if ($document->tenant_id !== $user->tenant_id) {

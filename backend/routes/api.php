@@ -3,6 +3,7 @@
 use App\Http\Controllers\Api\AttachmentController;
 use App\Http\Controllers\Api\DocumentController;
 use App\Http\Controllers\Api\EmployeeProfileController;
+use App\Http\Controllers\Api\NotificationController;
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\Auth\PasswordController;
 use Illuminate\Support\Facades\Route;
@@ -59,10 +60,17 @@ Route::middleware(['auth:sanctum', 'active'])->group(function () {
     Route::post('/documents/{document}/renew', [DocumentController::class, 'renew']);
     Route::get('/documents/{document}/reveal-number', [DocumentController::class, 'revealNumber']);
 
+    // T23 — escalation resolution (Manager/HR only; DocumentPolicy::dismissEscalation).
+    Route::post('/documents/{document}/escalation/dismiss', [DocumentController::class, 'dismissEscalation']);
+
     // T21 — attachment upload and signed-URL issuance require a live,
     // authorized session (same as every other document action above).
     Route::post('/documents/{document}/attachment', [AttachmentController::class, 'store']);
     Route::get('/documents/{document}/attachment', [AttachmentController::class, 'show']);
+
+    // T22 — reminder scheduling engine.
+    Route::get('/notifications', [NotificationController::class, 'index']);
+    Route::post('/notifications/scan', [NotificationController::class, 'scan']);
 });
 
 /*

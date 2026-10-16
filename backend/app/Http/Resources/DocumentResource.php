@@ -36,6 +36,15 @@ class DocumentResource extends JsonResource
             ] : null,
             'status' => $this->status,
             'last_renewed_at' => $this->last_renewed_at,
+            // T23 — null unless an active dismissal is in effect for the
+            // CURRENT expiry cycle (hasActiveEscalationDismissal() is
+            // what actually gates the evaluator; a stale dismissal from
+            // a prior cycle is never surfaced as "active").
+            'escalation_dismissed' => $this->hasActiveEscalationDismissal() ? [
+                'reason' => $this->escalation_dismissed_reason,
+                'dismissed_at' => $this->escalation_dismissed_at,
+                'dismissed_by' => $this->escalation_dismissed_by,
+            ] : null,
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
         ];

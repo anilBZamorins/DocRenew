@@ -11,6 +11,7 @@ use App\Http\Resources\DocumentResource;
 use App\Models\AuditLog;
 use App\Models\Document;
 use App\Models\User;
+use App\Services\ReminderEvaluator;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -28,6 +29,10 @@ use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
  */
 class DocumentController extends Controller
 {
+    public function __construct(private readonly ReminderEvaluator $reminderEvaluator)
+    {
+    }
+
     public function index(Request $request): AnonymousResourceCollection
     {
         $query = Document::query()->where('tenant_id', $request->user()->tenant_id);
@@ -80,6 +85,10 @@ class DocumentController extends Controller
             'employee_profile_id' => $document->employee_profile_id,
         ]);
 
+        // FSD 2.5 event-driven path — don't make a freshly-created
+        // already-close-to-expiry document wait for the next 15-min scan.
+        $this->reminderEvaluator->evaluateDocument($document);
+
         return (new DocumentResource($document))->response()->setStatusCode(201);
     }
 
@@ -92,11 +101,25 @@ class DocumentController extends Controller
 
     public function update(UpdateDocumentRequest $request, Document $document): DocumentResource
     {
-        $document->update($request->validated());
+        $validated = $request->validated();
+
+        // T23 — an expiry_date change manually applied outside renew()
+        // still starts a fresh cycle: any escalation dismissal recorded
+        // against the old expiry no longer applies.
+        if (array_key_exists('expiry_date', $validated) && (string) $validated['expiry_date'] !== (string) $document->expiry_date) {
+            $validated['escalation_dismissed_at'] = null;
+            $validated['escalation_dismissed_reason'] = null;
+            $validated['escalation_dismissed_by'] = null;
+        }
+
+        $document->update($validated);
 
         AuditLog::record('document.update', 'Document', $document->id, [
             'fields' => array_keys($request->validated()),
         ]);
+
+        // FSD 2.5 — an expiry_date (or document_type_id) change re-evaluates immediately.
+        $this->reminderEvaluator->evaluateDocument($document);
 
         return new DocumentResource($document);
     }
@@ -115,11 +138,45 @@ class DocumentController extends Controller
         $document->update([
             ...$request->validated(),
             'last_renewed_at' => now(),
+            // T23 — renewing resolves any in-progress escalation outright.
+            'escalation_dismissed_at' => null,
+            'escalation_dismissed_reason' => null,
+            'escalation_dismissed_by' => null,
         ]);
 
         AuditLog::record('document.renew', 'Document', $document->id, [
             'previous_expiry_date' => $previousExpiry,
             'new_expiry_date' => $document->expiry_date?->toDateString(),
+        ]);
+
+        return new DocumentResource($document);
+    }
+
+    /**
+     * T23 — FSD "Escalation flow": "Manager/HR resolves by renewing the
+     * document or dismissing the escalation with a recorded reason,
+     * which is retained in the audit log." This only pauses the
+     * recurring ESCALATION stage for the document's current expiry
+     * cycle (DocumentPolicy::dismissEscalation) — it does not affect
+     * the one-shot stages, which have already fired by the time
+     * escalation even starts.
+     */
+    public function dismissEscalation(Request $request, Document $document): DocumentResource
+    {
+        $this->authorize('dismissEscalation', $document);
+
+        $data = $request->validate([
+            'reason' => ['required', 'string', 'max:1000'],
+        ]);
+
+        $document->update([
+            'escalation_dismissed_at' => now(),
+            'escalation_dismissed_reason' => $data['reason'],
+            'escalation_dismissed_by' => $request->user()->id,
+        ]);
+
+        AuditLog::record('document.escalation.dismissed', 'Document', $document->id, [
+            'reason' => $data['reason'],
         ]);
 
         return new DocumentResource($document);

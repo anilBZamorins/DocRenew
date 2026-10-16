@@ -17,6 +17,7 @@ class Document extends Model
         'item_label', 'document_number', 'issue_date', 'expiry_date',
         'attachment_key', 'attachment_original_name', 'attachment_mime_type',
         'attachment_size_bytes', 'attachment_scanned_at', 'last_renewed_at',
+        'escalation_dismissed_at', 'escalation_dismissed_reason', 'escalation_dismissed_by',
     ];
 
     protected $hidden = [
@@ -43,11 +44,23 @@ class Document extends Model
         'last_renewed_at' => 'datetime',
         'attachment_scanned_at' => 'datetime',
         'attachment_size_bytes' => 'integer',
+        'escalation_dismissed_at' => 'datetime',
     ];
 
     public function hasAttachment(): bool
     {
         return ! empty($this->attachment_key);
+    }
+
+    /** T23 — true while a dismissal is in effect for the document's CURRENT expiry cycle. */
+    public function hasActiveEscalationDismissal(): bool
+    {
+        if (! $this->escalation_dismissed_at) {
+            return false;
+        }
+
+        // A renewal (or any expiry_date change) after the dismissal starts a new cycle.
+        return ! $this->last_renewed_at || $this->escalation_dismissed_at->gte($this->last_renewed_at);
     }
 
     public function tenant(): BelongsTo
@@ -63,6 +76,11 @@ class Document extends Model
     public function documentType(): BelongsTo
     {
         return $this->belongsTo(DocumentType::class);
+    }
+
+    public function notifications(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(Notification::class);
     }
 
     /** Convenience alias so controllers/requests can use 'document_number' rather than the _enc column name. */
