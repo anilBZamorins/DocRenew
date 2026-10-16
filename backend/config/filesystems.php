@@ -60,6 +60,31 @@ return [
             'report' => false,
         ],
 
+        /*
+         * T21 — document attachment storage (FSD 10 "Encryption at rest" /
+         * "Attachment access"). Phase 1 production target is a
+         * DigitalOcean Spaces (S3-compatible) bucket — switch the driver
+         * to 's3' with ATTACHMENTS_* env vars once Spaces credentials
+         * exist; the 'local' driver below is for dev/test. Either way the
+         * disk is NEVER public: files are encrypted application-side
+         * before being written (AttachmentEncryptor) and are only ever
+         * served through a short-lived signed URL
+         * (AttachmentController::stream), never a direct disk/bucket URL.
+         */
+        'attachments' => [
+            'driver' => env('ATTACHMENTS_DRIVER', 'local'),
+            'root' => storage_path('app/attachments'),
+            'key' => env('ATTACHMENTS_KEY', env('AWS_ACCESS_KEY_ID')),
+            'secret' => env('ATTACHMENTS_SECRET', env('AWS_SECRET_ACCESS_KEY')),
+            'region' => env('ATTACHMENTS_REGION', env('AWS_DEFAULT_REGION')),
+            'bucket' => env('ATTACHMENTS_BUCKET'),
+            'endpoint' => env('ATTACHMENTS_ENDPOINT'),
+            'use_path_style_endpoint' => env('ATTACHMENTS_USE_PATH_STYLE_ENDPOINT', false),
+            'visibility' => 'private',
+            'throw' => true,
+            'report' => false,
+        ],
+
     ],
 
     /*

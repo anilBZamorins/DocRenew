@@ -7,24 +7,27 @@ use Illuminate\Support\Facades\Schema;
 return new class extends Migration
 {
     /**
-     * Run the migrations.
+     * password_reset_tokens is keyed by (tenant_id, email) rather than
+     * Laravel's stock email-only primary key: DocRenew's uniqueness
+     * constraint on users is (tenant_id, email), so the same email can
+     * exist under two different tenants (FSD 3.4). An email-only key
+     * would let a reset token issued for one tenant's account reset a
+     * different tenant's same-email account — PasswordController uses
+     * this table directly rather than Laravel's PasswordBroker facade,
+     * which assumes an email-only key.
+     *
+     * sessions is kept from the default skeleton for the 'database'
+     * session driver configured in .env.
      */
     public function up(): void
     {
-        Schema::create('users', function (Blueprint $table) {
-            $table->id();
-            $table->string('name');
-            $table->string('email')->unique();
-            $table->timestamp('email_verified_at')->nullable();
-            $table->string('password');
-            $table->rememberToken();
-            $table->timestamps();
-        });
-
         Schema::create('password_reset_tokens', function (Blueprint $table) {
-            $table->string('email')->primary();
+            $table->uuid('tenant_id');
+            $table->string('email');
             $table->string('token');
             $table->timestamp('created_at')->nullable();
+
+            $table->primary(['tenant_id', 'email']);
         });
 
         Schema::create('sessions', function (Blueprint $table) {
@@ -37,12 +40,8 @@ return new class extends Migration
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
-        Schema::dropIfExists('users');
         Schema::dropIfExists('password_reset_tokens');
         Schema::dropIfExists('sessions');
     }

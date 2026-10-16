@@ -2,24 +2,31 @@
 
 namespace Database\Seeders;
 
+use App\Enums\UserRole;
+use App\Models\Tenant;
 use App\Models\User;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
 class DatabaseSeeder extends Seeder
 {
-    use WithoutModelEvents;
-
     /**
-     * Seed the application's database.
+     * Seeds one demo tenant with a bootstrap Admin account, so local/dev
+     * environments have a first login without a manual INSERT. Credentials
+     * are printed to the console rather than hardcoded in docs.
      */
     public function run(): void
     {
-        // User::factory(10)->create();
+        $tenant = Tenant::factory()->create(['name' => 'DocRenew Demo Org']);
 
-        User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
+        $admin = User::factory()->admin()->create([
+            'tenant_id' => $tenant->id,
+            'email' => 'admin@docrenew.test',
+            'password' => 'Password123',
         ]);
+
+        $this->call(DocumentTypeSeeder::class, false, ['tenant' => $tenant]);
+
+        $this->command?->info("Seeded tenant '{$tenant->name}' ({$tenant->id})");
+        $this->command?->info("Admin login: {$admin->email} / Password123  [tenant_id: {$tenant->id}]");
     }
 }
