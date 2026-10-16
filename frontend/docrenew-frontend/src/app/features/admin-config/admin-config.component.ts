@@ -1,7 +1,7 @@
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Router, RouterLink } from '@angular/router';
+import { Router } from '@angular/router';
 import { AuthService } from '../../core/auth.service';
 import { AdminConfigService } from './admin-config.service';
 import { DocumentsService } from '../documents/documents.service';
@@ -49,7 +49,7 @@ const ALL_CHANNELS: NotificationChannel[] = ['EMAIL', 'SMS', 'PUSH'];
 @Component({
   selector: 'app-admin-config',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink],
+  imports: [CommonModule, FormsModule],
   templateUrl: './admin-config.component.html',
   styleUrl: './admin-config.component.css',
 })

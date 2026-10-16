@@ -1,7 +1,7 @@
 import { Component, OnDestroy, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Router, RouterLink } from '@angular/router';
+import { Router } from '@angular/router';
 import { AuthService } from '../../core/auth.service';
 import { ReportsService } from './reports.service';
 import { DocumentsService } from '../documents/documents.service';
@@ -51,7 +51,7 @@ const STATUS_CLASSES: Record<ReportRecord['status'], string> = {
 @Component({
   selector: 'app-reports',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink],
+  imports: [CommonModule, FormsModule],
   templateUrl: './reports.component.html',
   styleUrl: './reports.component.css',
 })

@@ -1,7 +1,7 @@
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { AuthService } from '../../../core/auth.service';
 import { DocumentsService } from '../documents.service';
 import { DocumentRecord, DocumentStatus, DocumentType } from '../../../core/models';
@@ -44,7 +44,7 @@ const PILL_TONE_CLASSES: Record<StatusPresentation['tone'], string> = {
 @Component({
   selector: 'app-document-detail',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink],
+  imports: [CommonModule, FormsModule],
   templateUrl: './document-detail.component.html',
   styleUrl: './document-detail.component.css',
 })

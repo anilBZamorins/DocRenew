@@ -1,0 +1,89 @@
+<div
+  class="flex items-center gap-4 px-5 py-3 text-[#eaf3ff] sticky top-0 z-20 flex-wrap"
+  style="background: linear-gradient(135deg, var(--navy), #123a63 70%);"
+>
+  <a routerLink="/dashboard" class="flex items-center gap-2.5 mr-2 text-white no-underline">
+    <span class="w-[30px] h-[30px] rounded-[9px] grid place-items-center text-white" style="background: linear-gradient(135deg, var(--teal), var(--blue));">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-[17px] h-[17px]">
+        <path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
+      </svg>
+    </span>
+    <span class="font-display font-extrabold text-base tracking-tight">DocRenew</span>
+  </a>
+  <div class="flex-1"></div>
+  @if (auth.currentUser(); as user) {
+    <div class="text-xs text-[#9fc0e4] flex items-center gap-2">
+      <span class="w-[26px] h-[26px] rounded-full bg-brand-teal text-[#06241f] grid place-items-center font-extrabold text-[11px]">
+        {{ initials(user.employee_profile?.name ?? user.email) }}
+      </span>
+      <span>{{ user.employee_profile?.name ?? user.email }} &middot; {{ user.role }}</span>
+      <button
+        (click)="auth.logout()"
+        class="bg-transparent border border-white/25 text-[#cfe0f5] rounded-full px-3 py-1 text-[11.5px] font-bold cursor-pointer ml-2 hover:bg-white/10"
+      >
+        Sign out
+      </button>
+    </div>
+  }
+</div>
+
+<div class="flex items-start" style="min-height: calc(100vh - 54px);">
+  <aside class="w-[220px] flex-none bg-surface border-r border-line px-2.5 py-4 flex flex-col gap-0.5 sticky top-[54px]" style="height: calc(100vh - 54px);">
+    <div class="text-[10.5px] font-extrabold tracking-[.12em] uppercase text-muted px-2.5 pb-2.5">
+      {{ auth.currentUser()?.role }} screens
+    </div>
+
+    <a
+      routerLink="/dashboard"
+      routerLinkActive="bg-brand-sky border-line text-navy"
+      [routerLinkActiveOptions]="{ exact: true }"
+      class="flex items-center gap-2.5 px-2.5 py-2.5 rounded-[9px] text-[13.5px] font-semibold text-ink no-underline border border-transparent hover:bg-brand-sky"
+    >
+      <span class="w-1.5 h-1.5 rounded-full bg-line"></span>
+      {{ auth.currentUser()?.role === 'EMPLOYEE' ? 'My documents' : (auth.isTenantWide ? 'Dashboard' : 'Team dashboard') }}
+    </a>
+
+    <a
+      routerLink="/employees"
+      routerLinkActive="bg-brand-sky border-line text-navy"
+      class="flex items-center gap-2.5 px-2.5 py-2.5 rounded-[9px] text-[13.5px] font-semibold text-ink no-underline border border-transparent hover:bg-brand-sky"
+    >
+      <span class="w-1.5 h-1.5 rounded-full bg-line"></span>
+      {{ employeesNavLabel }}
+    </a>
+
+    @if (auth.currentUser()?.role !== 'EMPLOYEE') {
+      <a
+        routerLink="/reports"
+        routerLinkActive="bg-brand-sky border-line text-navy"
+        class="flex items-center gap-2.5 px-2.5 py-2.5 rounded-[9px] text-[13.5px] font-semibold text-ink no-underline border border-transparent hover:bg-brand-sky"
+      >
+        <span class="w-1.5 h-1.5 rounded-full bg-line"></span>
+        Reports
+      </a>
+    }
+
+    @if (auth.isTenantWide) {
+      <a
+        routerLink="/admin/config"
+        routerLinkActive="bg-brand-sky border-line text-navy"
+        class="flex items-center gap-2.5 px-2.5 py-2.5 rounded-[9px] text-[13.5px] font-semibold text-ink no-underline border border-transparent hover:bg-brand-sky"
+      >
+        <span class="w-1.5 h-1.5 rounded-full bg-line"></span>
+        Admin &amp; Config
+      </a>
+      <a
+        routerLink="/audit-log"
+        routerLinkActive="bg-brand-sky border-line text-navy"
+        class="flex items-center gap-2.5 px-2.5 py-2.5 rounded-[9px] text-[13.5px] font-semibold text-ink no-underline border border-transparent hover:bg-brand-sky"
+      >
+        <span class="w-1.5 h-1.5 rounded-full bg-line"></span>
+        Audit log
+      </a>
+    }
+  </aside>
+
+  <main class="flex-1 min-w-0">
+    <router-outlet />
+  </main>
+</div>

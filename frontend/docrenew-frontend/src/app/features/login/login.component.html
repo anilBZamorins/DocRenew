@@ -16,6 +16,21 @@
       <h1 class="text-[19px] font-display font-extrabold text-navy m-0 mb-1">Sign in to your workspace</h1>
       <p class="text-[12.5px] text-muted m-0 mb-5">Employee Document Renewal Management</p>
 
+      @if (isDev) {
+        <div class="mb-4 border border-dashed border-line rounded-[9px] px-3 py-2.5 bg-surface-2">
+          <label class="block text-[10.5px] font-bold text-muted mb-1.5 uppercase tracking-wide">Testing only &middot; quick sign-in</label>
+          <select
+            class="w-full border border-line bg-surface text-ink rounded-[9px] px-3 py-2 text-[13px] font-sans"
+            (change)="selectDemoAccount($any($event.target).value)"
+          >
+            <option value="">Pick a demo role…</option>
+            @for (account of demoAccounts; track account.email) {
+              <option [value]="account.email">{{ account.role }} &middot; {{ account.email }}</option>
+            }
+          </select>
+        </div>
+      }
+
       <form [formGroup]="form" (ngSubmit)="submit()">
         <div class="mb-3.5">
           <label class="block text-[11.5px] font-bold text-muted mb-1.5 uppercase tracking-wide">Email</label>

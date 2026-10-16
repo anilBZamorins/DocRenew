@@ -1,7 +1,7 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Router, RouterLink } from '@angular/router';
+import { Router } from '@angular/router';
 import { AuthService } from '../../core/auth.service';
 import { AuditLogService } from './audit-log.service';
 import { AuditLogRecord } from '../../core/models';
@@ -42,7 +42,7 @@ const KNOWN_ENTITY_TYPES = ['Document', 'Tenant', 'Report', 'EmployeeProfile'];
 @Component({
   selector: 'app-audit-log',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink],
+  imports: [CommonModule, FormsModule],
   templateUrl: './audit-log.component.html',
   styleUrl: './audit-log.component.css',
 })

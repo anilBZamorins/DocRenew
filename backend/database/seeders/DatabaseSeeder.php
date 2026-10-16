@@ -26,6 +26,7 @@ class DatabaseSeeder extends Seeder
 
         $this->call(DocumentTypeSeeder::class, false, ['tenant' => $tenant]);
         $this->call(ReminderScheduleSeeder::class, false, ['tenant' => $tenant]);
+        $this->call(DemoDataSeeder::class, false, ['tenant' => $tenant, 'admin' => $admin]);
 
         $this->command?->info("Seeded tenant '{$tenant->name}' ({$tenant->id})");
         $this->command?->info("Admin login: {$admin->email} / Password123  [tenant_id: {$tenant->id}]");

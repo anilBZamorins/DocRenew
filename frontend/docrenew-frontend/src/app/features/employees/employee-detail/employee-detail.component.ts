@@ -1,7 +1,7 @@
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { AuthService } from '../../../core/auth.service';
 import { EmployeesService } from '../employees.service';
 import { EmployeeProfile } from '../../../core/models';
@@ -18,7 +18,7 @@ import { EmployeeProfile } from '../../../core/models';
 @Component({
   selector: 'app-employee-detail',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink],
+  imports: [CommonModule, FormsModule],
   templateUrl: './employee-detail.component.html',
   styleUrl: './employee-detail.component.css',
 })
