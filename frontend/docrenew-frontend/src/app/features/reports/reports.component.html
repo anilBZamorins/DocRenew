@@ -1,0 +1,170 @@
+<div
+  class="flex items-center gap-4 px-5 py-3 text-[#eaf3ff] sticky top-0 z-20 flex-wrap"
+  style="background: linear-gradient(135deg, var(--navy), #123a63 70%);"
+>
+  <a routerLink="/dashboard" class="flex items-center gap-2.5 mr-2 text-white no-underline">
+    <span class="w-[30px] h-[30px] rounded-[9px] grid place-items-center text-white" style="background: linear-gradient(135deg, var(--teal), var(--blue));">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-[17px] h-[17px]">
+        <path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
+      </svg>
+    </span>
+    <span class="font-display font-extrabold text-base tracking-tight">DocRenew</span>
+  </a>
+  <div class="flex-1"></div>
+  <a routerLink="/dashboard" class="text-[11.5px] font-bold text-[#cfe0f5] no-underline hover:text-white">&larr; Back to dashboard</a>
+</div>
+
+<div class="px-[30px] pt-[26px] pb-[60px] max-w-[900px] mx-auto">
+  <div class="mb-5">
+    <div class="text-[11px] font-extrabold tracking-[.14em] uppercase text-brand-teal mb-1.5">COMPLIANCE</div>
+    <h1 class="text-[22px] font-display font-extrabold text-navy m-0 mb-1 tracking-tight">Reports</h1>
+    <p class="text-[13.5px] text-muted m-0 max-w-[62ch]">Generate audit-ready reports on demand — PDF or CSV.</p>
+  </div>
+
+  @if (errorMessage()) {
+    <div class="border-l-[3px] border-urgent bg-urgent-bg rounded-[10px] px-4 py-3 text-[12.5px] text-ink mb-4">{{ errorMessage() }}</div>
+  }
+
+  <div class="bg-surface border border-line rounded-card px-5 py-5 mb-6">
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-3.5">
+      <div class="sm:col-span-2">
+        <label class="block text-[11.5px] font-bold text-muted mb-1.5 uppercase tracking-wide">Report type</label>
+        <select
+          class="w-full border border-line bg-surface-2 text-ink rounded-[9px] px-3 py-2.5 text-[13.5px] font-sans"
+          [ngModel]="selectedType()"
+          (ngModelChange)="selectedType.set($event)"
+        >
+          @for (t of reportTypes; track t.value) {
+            <option [value]="t.value">{{ t.label }}</option>
+          }
+        </select>
+        <p class="text-[11.5px] text-muted mt-1.5">{{ selectedTypeDescription() }}</p>
+      </div>
+
+      <div>
+        <label class="block text-[11.5px] font-bold text-muted mb-1.5 uppercase tracking-wide">Format</label>
+        <select
+          class="w-full border border-line bg-surface-2 text-ink rounded-[9px] px-3 py-2.5 text-[13.5px] font-sans"
+          [ngModel]="selectedFormat()"
+          (ngModelChange)="selectedFormat.set($event)"
+        >
+          <option value="PDF">PDF</option>
+          <option value="CSV">CSV</option>
+        </select>
+      </div>
+      <div></div>
+
+      <div>
+        <label class="block text-[11.5px] font-bold text-muted mb-1.5 uppercase tracking-wide">From date</label>
+        <input
+          type="date"
+          class="w-full border border-line bg-surface-2 text-ink rounded-[9px] px-3 py-2.5 text-[13.5px] font-sans"
+          [ngModel]="dateFrom()"
+          (ngModelChange)="dateFrom.set($event)"
+        />
+      </div>
+      <div>
+        <label class="block text-[11.5px] font-bold text-muted mb-1.5 uppercase tracking-wide">To date</label>
+        <input
+          type="date"
+          class="w-full border border-line bg-surface-2 text-ink rounded-[9px] px-3 py-2.5 text-[13.5px] font-sans"
+          [ngModel]="dateTo()"
+          (ngModelChange)="dateTo.set($event)"
+        />
+      </div>
+
+      <div>
+        <label class="block text-[11.5px] font-bold text-muted mb-1.5 uppercase tracking-wide">Document type</label>
+        <select
+          class="w-full border border-line bg-surface-2 text-ink rounded-[9px] px-3 py-2.5 text-[13.5px] font-sans"
+          [ngModel]="documentTypeId()"
+          (ngModelChange)="documentTypeId.set($event)"
+        >
+          <option value="">All document types</option>
+          @for (t of documentTypes(); track t.id) {
+            <option [value]="t.id">{{ t.name }}</option>
+          }
+        </select>
+      </div>
+      <div>
+        <label class="block text-[11.5px] font-bold text-muted mb-1.5 uppercase tracking-wide">Department</label>
+        <input
+          type="text"
+          placeholder="optional"
+          class="w-full border border-line bg-surface-2 text-ink rounded-[9px] px-3 py-2.5 text-[13.5px] font-sans"
+          [ngModel]="department()"
+          (ngModelChange)="department.set($event)"
+        />
+      </div>
+    </div>
+
+    <div class="mt-5">
+      <button
+        class="text-white border-0 rounded-[9px] px-4 py-2.5 text-[13.5px] font-bold disabled:opacity-60"
+        style="background: linear-gradient(135deg, var(--teal), var(--blue));"
+        [disabled]="requesting()"
+        (click)="generate()"
+      >
+        {{ requesting() ? 'Requesting…' : 'Generate report' }}
+      </button>
+    </div>
+  </div>
+
+  <h3 class="text-navy text-[14px] font-display font-bold mb-1">Recently generated</h3>
+  <p class="text-[11.5px] text-muted mb-2.5">Only reports you've generated in this session are listed here — DocRenew doesn't keep a saved report history yet.</p>
+
+  @if (reports().length) {
+    <div class="bg-surface border border-line rounded-card overflow-hidden">
+      <table class="w-full border-collapse text-[13px]">
+        <thead>
+          <tr class="bg-surface-2 text-left">
+            <th class="px-3 py-2.5 font-bold text-muted text-[11px] uppercase tracking-wide">Report</th>
+            <th class="px-3 py-2.5 font-bold text-muted text-[11px] uppercase tracking-wide">Format</th>
+            <th class="px-3 py-2.5 font-bold text-muted text-[11px] uppercase tracking-wide">Requested</th>
+            <th class="px-3 py-2.5 font-bold text-muted text-[11px] uppercase tracking-wide">Rows</th>
+            <th class="px-3 py-2.5 font-bold text-muted text-[11px] uppercase tracking-wide">Status</th>
+            <th class="px-3 py-2.5"></th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (r of reports(); track r.id) {
+            <tr class="border-b border-line last:border-b-0">
+              <td class="px-3 py-2.5 text-ink font-semibold">
+                {{ typeLabel(r.type) }}
+                @if (r.filters?.document_type_id) {
+                  <span class="text-muted text-[11.5px] font-normal">&middot; {{ documentTypeName(r.filters?.document_type_id) }}</span>
+                }
+              </td>
+              <td class="px-3 py-2.5 text-ink">{{ r.format }}</td>
+              <td class="px-3 py-2.5 text-ink">{{ r.requested_at | date: 'medium' }}</td>
+              <td class="px-3 py-2.5 text-ink">{{ r.row_count ?? '—' }}</td>
+              <td class="px-3 py-2.5">
+                <span
+                  class="inline-flex items-center gap-1.5 text-[11px] font-bold px-2.5 py-1 rounded-pill whitespace-nowrap"
+                  [class]="statusClasses[r.status]"
+                >
+                  {{ statusLabel[r.status] }}
+                </span>
+                @if (r.status === 'FAILED' && r.error_message) {
+                  <div class="text-[11px] text-urgent mt-1 max-w-[220px]">{{ r.error_message }}</div>
+                }
+              </td>
+              <td class="px-3 py-2.5 whitespace-nowrap">
+                @if (r.status === 'COMPLETED' && r.download_available) {
+                  <button
+                    class="border border-line bg-transparent text-ink rounded-[8px] px-3 py-1.5 text-[12px] font-bold"
+                    (click)="download(r)"
+                  >
+                    Download
+                  </button>
+                }
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  } @else {
+    <p class="text-muted text-[12.5px]">No reports generated yet this session.</p>
+  }
+</div>

@@ -141,3 +141,36 @@ export interface TenantSettings {
   default_scan_window_start: string | null;
   default_scan_window_end: string | null;
 }
+
+/**
+ * T35 — Reports & compliance export (FSD 4.3, T25's APIs). ReportPolicy:
+ * create() is anyone except Employee; view()/download() is tenant-wide
+ * for Admin/HR, but a Manager only ever sees a report where
+ * requested_by === their own user id — Employee gets neither. There's
+ * no GET /reports list endpoint, so the UI can only show reports
+ * requested in the current session (ReportsComponent tracks that list
+ * client-side), not a durable history.
+ */
+export type ReportType = 'COMPLIANCE_SNAPSHOT' | 'OVERDUE' | 'NOTIFICATION_ACTIVITY' | 'RENEWAL_HISTORY';
+export type ReportFormat = 'CSV' | 'PDF';
+export type ReportStatus = 'PENDING' | 'PROCESSING' | 'COMPLETED' | 'FAILED';
+
+export interface ReportFilters {
+  date_from?: string;
+  date_to?: string;
+  document_type_id?: string;
+  department?: string;
+}
+
+export interface ReportRecord {
+  id: string;
+  type: ReportType;
+  format: ReportFormat;
+  status: ReportStatus;
+  filters: ReportFilters | null;
+  row_count: number | null;
+  error_message: string | null;
+  download_available: boolean;
+  requested_at: string;
+  completed_at: string | null;
+}

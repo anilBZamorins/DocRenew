@@ -16,6 +16,14 @@
   >
     {{ auth.isTenantWide ? 'Employees' : (auth.currentUser()?.role === 'EMPLOYEE' ? 'My profile' : 'My team') }}
   </a>
+  @if (auth.currentUser()?.role !== 'EMPLOYEE') {
+    <a
+      routerLink="/reports"
+      class="text-[11.5px] font-bold text-[#cfe0f5] no-underline hover:text-white"
+    >
+      Reports
+    </a>
+  }
   @if (auth.isTenantWide) {
     <a
       routerLink="/admin/config"
