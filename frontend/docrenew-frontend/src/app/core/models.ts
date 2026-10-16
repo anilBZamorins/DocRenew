@@ -108,3 +108,36 @@ export interface DocumentFormPayload {
   issue_date?: string | null;
   expiry_date: string;
 }
+
+/**
+ * T34 — Admin configuration (FSD 4.5). Matches NotificationStage's five
+ * cases; ESCALATION is the only one that uses cadence_days (T22/T23's
+ * one-shot-vs-recurring split, mirrored by UpdateReminderSchedulesRequest's
+ * server-side cross-check).
+ */
+export type ReminderStage = 'THREE_MONTH' | 'ONE_MONTH' | 'FIVE_DAY' | 'ON_EXPIRY' | 'ESCALATION';
+
+export type NotificationChannel = 'EMAIL' | 'SMS' | 'PUSH';
+
+export interface ReminderScheduleRow {
+  id?: string;
+  document_type_id: string | null;
+  document_type_name?: string | null;
+  stage: ReminderStage;
+  offset_days: number;
+  cadence_days: number | null;
+  channels: NotificationChannel[];
+  active: boolean;
+  updated_at?: string;
+}
+
+export interface TenantSettings {
+  id: string;
+  name: string;
+  timezone: string;
+  logo_url: string | null;
+  date_format: 'Y-m-d' | 'd/m/Y' | 'm/d/Y' | 'd-M-Y';
+  default_scan_interval_minutes: number;
+  default_scan_window_start: string | null;
+  default_scan_window_end: string | null;
+}

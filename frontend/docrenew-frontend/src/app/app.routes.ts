@@ -42,5 +42,11 @@ export const routes: Routes = [
     loadComponent: () =>
       import('./features/employees/employee-detail/employee-detail.component').then((m) => m.EmployeeDetailComponent),
   },
+  {
+    path: 'admin/config',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./features/admin-config/admin-config.component').then((m) => m.AdminConfigComponent),
+  },
   { path: '**', redirectTo: 'dashboard' },
 ];

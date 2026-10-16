@@ -1,0 +1,431 @@
+<div
+  class="flex items-center gap-4 px-5 py-3 text-[#eaf3ff] sticky top-0 z-20 flex-wrap"
+  style="background: linear-gradient(135deg, var(--navy), #123a63 70%);"
+>
+  <a routerLink="/dashboard" class="flex items-center gap-2.5 mr-2 text-white no-underline">
+    <span class="w-[30px] h-[30px] rounded-[9px] grid place-items-center text-white" style="background: linear-gradient(135deg, var(--teal), var(--blue));">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-[17px] h-[17px]">
+        <path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
+      </svg>
+    </span>
+    <span class="font-display font-extrabold text-base tracking-tight">DocRenew</span>
+  </a>
+  <div class="flex-1"></div>
+  <a routerLink="/dashboard" class="text-[11.5px] font-bold text-[#cfe0f5] no-underline hover:text-white">&larr; Back to dashboard</a>
+</div>
+
+<div class="px-[30px] pt-[26px] pb-[60px] max-w-[980px] mx-auto">
+  <div class="mb-5">
+    <div class="text-[11px] font-extrabold tracking-[.14em] uppercase text-brand-teal mb-1.5">ADMIN &middot; CONFIGURATION</div>
+    <h1 class="text-[22px] font-display font-extrabold text-navy m-0 mb-1 tracking-tight">Admin &amp; Configuration</h1>
+    <p class="text-[13.5px] text-muted m-0 max-w-[62ch]">Reminder rules, organization settings, and the role permission model DocRenew enforces.</p>
+  </div>
+
+  <div class="flex items-center gap-1.5 mb-5 border-b border-line">
+    <button
+      class="px-3.5 py-2.5 text-[13px] font-bold border-b-2 -mb-px"
+      [class]="tab() === 'reminders' ? 'border-brand-teal text-navy' : 'border-transparent text-muted'"
+      (click)="tab.set('reminders')"
+    >
+      Reminder Rules
+    </button>
+    <button
+      class="px-3.5 py-2.5 text-[13px] font-bold border-b-2 -mb-px"
+      [class]="tab() === 'settings' ? 'border-brand-teal text-navy' : 'border-transparent text-muted'"
+      (click)="tab.set('settings')"
+    >
+      Organization Settings
+    </button>
+    <button
+      class="px-3.5 py-2.5 text-[13px] font-bold border-b-2 -mb-px"
+      [class]="tab() === 'roles' ? 'border-brand-teal text-navy' : 'border-transparent text-muted'"
+      (click)="tab.set('roles')"
+    >
+      Roles &amp; Permissions
+    </button>
+    @if (isHr()) {
+      <span class="ml-auto mb-2.5 inline-flex items-center gap-1.5 text-[11px] font-bold px-2.5 py-1 rounded-pill whitespace-nowrap bg-idle-bg text-idle">
+        View only &middot; Admin can edit
+      </span>
+    }
+  </div>
+
+  <!-- ============== Reminder Rules ============== -->
+  @if (tab() === 'reminders') {
+    @if (loadingSchedules()) {
+      <p class="text-muted text-[13.5px]">Loading…</p>
+    } @else {
+      @if (schedulesError()) {
+        <div class="border-l-[3px] border-urgent bg-urgent-bg rounded-[10px] px-4 py-3 text-[12.5px] text-ink mb-4">{{ schedulesError() }}</div>
+      }
+      @if (schedulesMessage()) {
+        <div class="border-l-[3px] border-brand-teal bg-brand-sky rounded-[10px] px-4 py-3 text-[12.5px] text-ink mb-4">{{ schedulesMessage() }}</div>
+      }
+
+      <h3 class="text-navy text-[14px] font-display font-bold mb-2.5">Tenant-wide defaults</h3>
+      <div class="bg-surface border border-line rounded-card overflow-hidden mb-6">
+        <table class="w-full border-collapse text-[13px]">
+          <thead>
+            <tr class="bg-surface-2 text-left">
+              <th class="px-3 py-2.5 font-bold text-muted text-[11px] uppercase tracking-wide">Stage</th>
+              <th class="px-3 py-2.5 font-bold text-muted text-[11px] uppercase tracking-wide w-[110px]">Offset (days)</th>
+              <th class="px-3 py-2.5 font-bold text-muted text-[11px] uppercase tracking-wide w-[120px]">Repeats every</th>
+              <th class="px-3 py-2.5 font-bold text-muted text-[11px] uppercase tracking-wide">Channels</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (row of defaultRows(); track row.stage) {
+              <tr class="border-b border-line last:border-b-0">
+                <td class="px-3 py-2.5 text-ink font-semibold">{{ stageLabels[row.stage] }}</td>
+                <td class="px-3 py-2.5">
+                  <input
+                    type="number"
+                    min="0"
+                    class="w-[80px] border border-line bg-surface-2 text-ink rounded-[7px] px-2 py-1.5 text-[13px] disabled:opacity-60"
+                    [ngModel]="row.offset_days"
+                    (ngModelChange)="row.offset_days = $event"
+                    [disabled]="!canEdit()"
+                  />
+                </td>
+                <td class="px-3 py-2.5">
+                  @if (row.stage === 'ESCALATION') {
+                    <div class="flex items-center gap-1.5">
+                      <input
+                        type="number"
+                        min="1"
+                        class="w-[60px] border border-line bg-surface-2 text-ink rounded-[7px] px-2 py-1.5 text-[13px] disabled:opacity-60"
+                        [ngModel]="row.cadence_days"
+                        (ngModelChange)="row.cadence_days = $event"
+                        [disabled]="!canEdit()"
+                      />
+                      <span class="text-muted text-[11.5px]">days</span>
+                    </div>
+                  } @else {
+                    <span class="text-muted text-[12px]">—</span>
+                  }
+                </td>
+                <td class="px-3 py-2.5">
+                  <div class="flex items-center gap-3 flex-wrap">
+                    @for (ch of allChannels; track ch) {
+                      <label class="flex items-center gap-1.5 text-[12.5px] text-ink">
+                        <input
+                          type="checkbox"
+                          [checked]="row.channels.includes(ch)"
+                          (change)="toggleChannel(row, ch)"
+                          [disabled]="!canEdit()"
+                        />
+                        {{ ch }}
+                      </label>
+                    }
+                  </div>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+
+      <div class="flex items-center justify-between mb-2.5 flex-wrap gap-2">
+        <h3 class="text-navy text-[14px] font-display font-bold m-0">Per-document-type overrides</h3>
+        @if (canEdit() && documentTypes().length) {
+          <div class="flex items-center gap-2">
+            <select
+              class="border border-line bg-surface text-ink rounded-[8px] px-2.5 py-1.5 text-[12.5px]"
+              [ngModel]="newOverrideTypeId()"
+              (ngModelChange)="newOverrideTypeId.set($event)"
+            >
+              <option value="">Select a document type…</option>
+              @for (t of documentTypes(); track t.id) {
+                <option [value]="t.id">{{ t.name }}</option>
+              }
+            </select>
+            <select
+              class="border border-line bg-surface text-ink rounded-[8px] px-2.5 py-1.5 text-[12.5px]"
+              [ngModel]="newOverrideStage()"
+              (ngModelChange)="newOverrideStage.set($event)"
+            >
+              @for (stage of ['THREE_MONTH', 'ONE_MONTH', 'FIVE_DAY', 'ON_EXPIRY', 'ESCALATION']; track stage) {
+                <option [value]="stage">{{ stageLabels[stage] }}</option>
+              }
+            </select>
+            <button
+              class="border border-line bg-transparent text-ink rounded-[8px] px-3 py-1.5 text-[12.5px] font-bold"
+              [disabled]="!newOverrideTypeId()"
+              (click)="addOverride()"
+            >
+              + Add override
+            </button>
+          </div>
+        }
+      </div>
+
+      @if (overrideRows().length) {
+        <div class="bg-surface border border-line rounded-card overflow-hidden mb-6">
+          <table class="w-full border-collapse text-[13px]">
+            <thead>
+              <tr class="bg-surface-2 text-left">
+                <th class="px-3 py-2.5 font-bold text-muted text-[11px] uppercase tracking-wide">Document type</th>
+                <th class="px-3 py-2.5 font-bold text-muted text-[11px] uppercase tracking-wide">Stage</th>
+                <th class="px-3 py-2.5 font-bold text-muted text-[11px] uppercase tracking-wide w-[100px]">Offset</th>
+                <th class="px-3 py-2.5 font-bold text-muted text-[11px] uppercase tracking-wide">Channels</th>
+                <th class="px-3 py-2.5 font-bold text-muted text-[11px] uppercase tracking-wide">Status</th>
+                <th class="px-3 py-2.5"></th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (row of overrideRows(); track row.document_type_id + '-' + row.stage) {
+                <tr class="border-b border-line last:border-b-0" [class.opacity-50]="!row.active">
+                  <td class="px-3 py-2.5 text-ink font-semibold">{{ row.document_type_name }}</td>
+                  <td class="px-3 py-2.5 text-ink">{{ stageLabels[row.stage] }}</td>
+                  <td class="px-3 py-2.5">
+                    <input
+                      type="number"
+                      min="0"
+                      class="w-[70px] border border-line bg-surface-2 text-ink rounded-[7px] px-2 py-1.5 text-[13px] disabled:opacity-60"
+                      [ngModel]="row.offset_days"
+                      (ngModelChange)="row.offset_days = $event"
+                      [disabled]="!canEdit()"
+                    />
+                  </td>
+                  <td class="px-3 py-2.5">
+                    <div class="flex items-center gap-2.5 flex-wrap">
+                      @for (ch of allChannels; track ch) {
+                        <label class="flex items-center gap-1 text-[12px] text-ink">
+                          <input
+                            type="checkbox"
+                            [checked]="row.channels.includes(ch)"
+                            (change)="toggleChannel(row, ch)"
+                            [disabled]="!canEdit()"
+                          />
+                          {{ ch }}
+                        </label>
+                      }
+                    </div>
+                  </td>
+                  <td class="px-3 py-2.5">
+                    <span
+                      class="inline-flex items-center gap-1.5 text-[11px] font-bold px-2.5 py-1 rounded-pill whitespace-nowrap"
+                      [class]="row.active ? 'bg-ok-bg text-ok' : 'bg-idle-bg text-idle'"
+                    >
+                      {{ row.active ? 'Active' : 'Inactive' }}
+                    </span>
+                  </td>
+                  <td class="px-3 py-2.5">
+                    @if (canEdit()) {
+                      @if (row.active) {
+                        <button class="border border-line bg-transparent text-ink rounded-[7px] px-2.5 py-1 text-[11.5px] font-bold" (click)="removeOverride(row)">
+                          Deactivate
+                        </button>
+                      } @else {
+                        <button class="border border-line bg-transparent text-ink rounded-[7px] px-2.5 py-1 text-[11.5px] font-bold" (click)="row.active = true">
+                          Reactivate
+                        </button>
+                      }
+                    }
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      } @else {
+        <p class="text-muted text-[12.5px] mb-6">No per-document-type overrides yet — every document type uses the tenant-wide defaults above.</p>
+      }
+
+      @if (canEdit()) {
+        <button
+          class="text-white border-0 rounded-[9px] px-4 py-2.5 text-[13.5px] font-bold disabled:opacity-60"
+          style="background: linear-gradient(135deg, var(--teal), var(--blue));"
+          [disabled]="savingSchedules()"
+          (click)="saveSchedules()"
+        >
+          {{ savingSchedules() ? 'Saving…' : 'Save reminder rules' }}
+        </button>
+      }
+    }
+  }
+
+  <!-- ============== Organization Settings ============== -->
+  @if (tab() === 'settings') {
+    @if (loadingSettings()) {
+      <p class="text-muted text-[13.5px]">Loading…</p>
+    } @else {
+      @if (settingsError()) {
+        <div class="border-l-[3px] border-urgent bg-urgent-bg rounded-[10px] px-4 py-3 text-[12.5px] text-ink mb-4">{{ settingsError() }}</div>
+      }
+      @if (settingsMessage()) {
+        <div class="border-l-[3px] border-brand-teal bg-brand-sky rounded-[10px] px-4 py-3 text-[12.5px] text-ink mb-4">{{ settingsMessage() }}</div>
+      }
+
+      <div class="bg-surface border border-line rounded-card px-5 py-5 max-w-[640px]">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-3.5">
+          <div class="sm:col-span-2">
+            <label class="block text-[11.5px] font-bold text-muted mb-1.5 uppercase tracking-wide">Organization name</label>
+            <input
+              type="text"
+              class="w-full border border-line bg-surface-2 text-ink rounded-[9px] px-3 py-2.5 text-[13.5px] font-sans disabled:opacity-60"
+              [ngModel]="settingsName()"
+              (ngModelChange)="settingsName.set($event)"
+              [disabled]="!canEdit()"
+            />
+          </div>
+          <div>
+            <label class="block text-[11.5px] font-bold text-muted mb-1.5 uppercase tracking-wide">Timezone</label>
+            <input
+              type="text"
+              placeholder="e.g. Asia/Kolkata"
+              class="w-full border border-line bg-surface-2 text-ink rounded-[9px] px-3 py-2.5 text-[13.5px] font-sans disabled:opacity-60"
+              [ngModel]="settingsTimezone()"
+              (ngModelChange)="settingsTimezone.set($event)"
+              [disabled]="!canEdit()"
+            />
+          </div>
+          <div>
+            <label class="block text-[11.5px] font-bold text-muted mb-1.5 uppercase tracking-wide">Date format</label>
+            <select
+              class="w-full border border-line bg-surface-2 text-ink rounded-[9px] px-3 py-2.5 text-[13.5px] font-sans disabled:opacity-60"
+              [ngModel]="settingsDateFormat()"
+              (ngModelChange)="settingsDateFormat.set($event)"
+              [disabled]="!canEdit()"
+            >
+              <option value="Y-m-d">2026-10-16 (Y-m-d)</option>
+              <option value="d/m/Y">16/10/2026 (d/m/Y)</option>
+              <option value="m/d/Y">10/16/2026 (m/d/Y)</option>
+              <option value="d-M-Y">16-Oct-2026 (d-M-Y)</option>
+            </select>
+          </div>
+          <div class="sm:col-span-2">
+            <label class="block text-[11.5px] font-bold text-muted mb-1.5 uppercase tracking-wide">Logo URL</label>
+            <input
+              type="text"
+              placeholder="optional"
+              class="w-full border border-line bg-surface-2 text-ink rounded-[9px] px-3 py-2.5 text-[13.5px] font-sans disabled:opacity-60"
+              [ngModel]="settingsLogoUrl()"
+              (ngModelChange)="settingsLogoUrl.set($event)"
+              [disabled]="!canEdit()"
+            />
+          </div>
+          <div>
+            <label class="block text-[11.5px] font-bold text-muted mb-1.5 uppercase tracking-wide">Scan interval (minutes)</label>
+            <input
+              type="number"
+              min="1"
+              max="1440"
+              class="w-full border border-line bg-surface-2 text-ink rounded-[9px] px-3 py-2.5 text-[13.5px] font-sans disabled:opacity-60"
+              [ngModel]="settingsScanInterval()"
+              (ngModelChange)="settingsScanInterval.set($event)"
+              [disabled]="!canEdit()"
+            />
+          </div>
+          <div></div>
+          <div>
+            <label class="block text-[11.5px] font-bold text-muted mb-1.5 uppercase tracking-wide">Scan window start</label>
+            <input
+              type="time"
+              class="w-full border border-line bg-surface-2 text-ink rounded-[9px] px-3 py-2.5 text-[13.5px] font-sans disabled:opacity-60"
+              [ngModel]="settingsScanWindowStart()"
+              (ngModelChange)="settingsScanWindowStart.set($event)"
+              [disabled]="!canEdit()"
+            />
+          </div>
+          <div>
+            <label class="block text-[11.5px] font-bold text-muted mb-1.5 uppercase tracking-wide">Scan window end</label>
+            <input
+              type="time"
+              class="w-full border border-line bg-surface-2 text-ink rounded-[9px] px-3 py-2.5 text-[13.5px] font-sans disabled:opacity-60"
+              [ngModel]="settingsScanWindowEnd()"
+              (ngModelChange)="settingsScanWindowEnd.set($event)"
+              [disabled]="!canEdit()"
+            />
+          </div>
+        </div>
+
+        @if (canEdit()) {
+          <div class="mt-5">
+            <button
+              class="text-white border-0 rounded-[9px] px-4 py-2.5 text-[13.5px] font-bold disabled:opacity-60"
+              style="background: linear-gradient(135deg, var(--teal), var(--blue));"
+              [disabled]="savingSettings()"
+              (click)="saveSettings()"
+            >
+              {{ savingSettings() ? 'Saving…' : 'Save settings' }}
+            </button>
+          </div>
+        }
+        <p class="text-[11.5px] text-muted mt-3">The scan interval is stored here for visibility, but the notification scan job currently runs on a single system-wide schedule rather than reading this per tenant.</p>
+      </div>
+    }
+  }
+
+  <!-- ============== Roles & Permissions ============== -->
+  @if (tab() === 'roles') {
+    <p class="text-[13px] text-muted mb-4 max-w-[70ch]">
+      This is a reference view of DocRenew's permission model (FSD 3.2) — it isn't editable here. Inviting teammates
+      and assigning individual roles is a separate capability that hasn't been built into this UI yet.
+    </p>
+    <div class="bg-surface border border-line rounded-card overflow-hidden">
+      <table class="w-full border-collapse text-[12.5px]">
+        <thead>
+          <tr class="bg-surface-2 text-left">
+            <th class="px-3 py-2.5 font-bold text-muted text-[11px] uppercase tracking-wide">Module</th>
+            <th class="px-3 py-2.5 font-bold text-muted text-[11px] uppercase tracking-wide">Admin</th>
+            <th class="px-3 py-2.5 font-bold text-muted text-[11px] uppercase tracking-wide">HR</th>
+            <th class="px-3 py-2.5 font-bold text-muted text-[11px] uppercase tracking-wide">Manager</th>
+            <th class="px-3 py-2.5 font-bold text-muted text-[11px] uppercase tracking-wide">Employee</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr class="border-b border-line">
+            <td class="px-3 py-2.5 font-semibold text-ink">Document records — all employees</td>
+            <td class="px-3 py-2.5 text-ok font-semibold">Full</td>
+            <td class="px-3 py-2.5 text-ok font-semibold">Full</td>
+            <td class="px-3 py-2.5 text-warn font-semibold">View (own team)</td>
+            <td class="px-3 py-2.5 text-muted">None</td>
+          </tr>
+          <tr class="border-b border-line">
+            <td class="px-3 py-2.5 font-semibold text-ink">Document records — own documents</td>
+            <td class="px-3 py-2.5 text-ok font-semibold">Full</td>
+            <td class="px-3 py-2.5 text-ok font-semibold">Full</td>
+            <td class="px-3 py-2.5 text-ok font-semibold">Full</td>
+            <td class="px-3 py-2.5 text-ok font-semibold">Full</td>
+          </tr>
+          <tr class="border-b border-line">
+            <td class="px-3 py-2.5 font-semibold text-ink">Employee profiles — all employees</td>
+            <td class="px-3 py-2.5 text-ok font-semibold">Full</td>
+            <td class="px-3 py-2.5 text-ok font-semibold">Full</td>
+            <td class="px-3 py-2.5 text-warn font-semibold">View (own team)</td>
+            <td class="px-3 py-2.5 text-muted">None</td>
+          </tr>
+          <tr class="border-b border-line">
+            <td class="px-3 py-2.5 font-semibold text-ink">Employee profiles — own profile</td>
+            <td class="px-3 py-2.5 text-ok font-semibold">Full</td>
+            <td class="px-3 py-2.5 text-ok font-semibold">Full</td>
+            <td class="px-3 py-2.5 text-ok font-semibold">Full</td>
+            <td class="px-3 py-2.5 text-warn font-semibold">Edit (limited fields)</td>
+          </tr>
+          <tr class="border-b border-line">
+            <td class="px-3 py-2.5 font-semibold text-ink">Dashboard &amp; compliance reports</td>
+            <td class="px-3 py-2.5 text-ok font-semibold">Full</td>
+            <td class="px-3 py-2.5 text-ok font-semibold">Full</td>
+            <td class="px-3 py-2.5 text-warn font-semibold">Team scope</td>
+            <td class="px-3 py-2.5 text-muted">None</td>
+          </tr>
+          <tr class="border-b border-line">
+            <td class="px-3 py-2.5 font-semibold text-ink">Tenant configuration (reminder rules, branding)</td>
+            <td class="px-3 py-2.5 text-ok font-semibold">Full</td>
+            <td class="px-3 py-2.5 text-warn font-semibold">View</td>
+            <td class="px-3 py-2.5 text-muted">None</td>
+            <td class="px-3 py-2.5 text-muted">None</td>
+          </tr>
+          <tr>
+            <td class="px-3 py-2.5 font-semibold text-ink">Audit log</td>
+            <td class="px-3 py-2.5 text-ok font-semibold">Full</td>
+            <td class="px-3 py-2.5 text-warn font-semibold">View</td>
+            <td class="px-3 py-2.5 text-muted">None</td>
+            <td class="px-3 py-2.5 text-muted">None</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  }
+</div>
