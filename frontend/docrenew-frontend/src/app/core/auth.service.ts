@@ -14,14 +14,13 @@ interface TokenPair {
 
 const ACCESS_TOKEN_KEY = 'docrenew_access_token';
 const REFRESH_TOKEN_KEY = 'docrenew_refresh_token';
-const TENANT_ID_KEY = 'docrenew_tenant_id';
 
 /**
- * T31 — talks to T19's auth endpoints. Sign-in needs a tenant_id, which
- * the Jira task sheet's FSD doesn't surface a separate "find my
- * workspace" screen for, so the login form collects it directly
- * alongside email/password (matching AuthController::login()'s
- * required fields exactly) rather than inventing a lookup step.
+ * T31 — talks to T19's auth endpoints. Sign-in is email + password only;
+ * AuthController::login() resolves the tenant from the email itself
+ * (every users row is still tenant-scoped under the hood via
+ * unique(['tenant_id', 'email']) — this just means the person no longer
+ * has to know or paste their organization's tenant id to sign in).
  */
 @Injectable({ providedIn: 'root' })
 export class AuthService {
@@ -29,16 +28,13 @@ export class AuthService {
 
   constructor(private readonly http: HttpClient, private readonly router: Router) {}
 
-  login(tenantId: string, email: string, password: string): Observable<TokenPair> {
-    return this.http
-      .post<TokenPair>(`${environment.apiUrl}/auth/login`, { tenant_id: tenantId, email, password })
-      .pipe(
-        tap((tokens) => {
-          localStorage.setItem(ACCESS_TOKEN_KEY, tokens.access_token);
-          localStorage.setItem(REFRESH_TOKEN_KEY, tokens.refresh_token);
-          localStorage.setItem(TENANT_ID_KEY, tenantId);
-        }),
-      );
+  login(email: string, password: string): Observable<TokenPair> {
+    return this.http.post<TokenPair>(`${environment.apiUrl}/auth/login`, { email, password }).pipe(
+      tap((tokens) => {
+        localStorage.setItem(ACCESS_TOKEN_KEY, tokens.access_token);
+        localStorage.setItem(REFRESH_TOKEN_KEY, tokens.refresh_token);
+      }),
+    );
   }
 
   fetchMe(): Observable<AuthenticatedUser> {
@@ -51,7 +47,6 @@ export class AuthService {
     const token = this.accessToken;
     localStorage.removeItem(ACCESS_TOKEN_KEY);
     localStorage.removeItem(REFRESH_TOKEN_KEY);
-    localStorage.removeItem(TENANT_ID_KEY);
     this.currentUser.set(null);
     if (token) {
       this.http.post(`${environment.apiUrl}/auth/logout`, {}).subscribe({ error: () => {} });

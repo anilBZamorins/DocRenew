@@ -17,7 +17,6 @@ export class LoginComponent {
   private readonly router = inject(Router);
 
   readonly form = this.fb.group({
-    tenantId: ['', Validators.required],
     email: ['', [Validators.required, Validators.email]],
     password: ['', Validators.required],
   });
@@ -31,11 +30,11 @@ export class LoginComponent {
       return;
     }
 
-    const { tenantId, email, password } = this.form.getRawValue();
+    const { email, password } = this.form.getRawValue();
     this.submitting.set(true);
     this.errorMessage.set(null);
 
-    this.auth.login(tenantId!, email!, password!).subscribe({
+    this.auth.login(email!, password!).subscribe({
       next: () => {
         this.auth.fetchMe().subscribe({
           next: () => {

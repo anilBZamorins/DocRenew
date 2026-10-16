@@ -32,7 +32,6 @@ class AuthController extends Controller
         $credentials = $request->validate([
             'email' => ['required', 'email'],
             'password' => ['required', 'string'],
-            'tenant_id' => ['required', 'uuid'],
         ]);
 
         $throttleKey = strtolower($credentials['email']).'|'.$request->ip();
@@ -43,9 +42,24 @@ class AuthController extends Controller
             ]);
         }
 
-        $user = User::where('tenant_id', $credentials['tenant_id'])
-            ->where('email', $credentials['email'])
-            ->first();
+        // Login no longer asks for a tenant id up front (every "users" row
+        // is still scoped by tenant_id — see unique(['tenant_id', 'email'])
+        // on the users table — this just resolves it from the email
+        // instead of making the person supply it). An email is expected
+        // to belong to exactly one tenant in practice; if it somehow
+        // matches more than one, we deliberately refuse rather than
+        // guessing which organization's account to sign the person into.
+        $matches = User::where('email', $credentials['email'])->get();
+
+        if ($matches->count() > 1) {
+            RateLimiter::hit($throttleKey, 60);
+
+            throw ValidationException::withMessages([
+                'email' => 'This email is linked to more than one organization. Contact your administrator.',
+            ]);
+        }
+
+        $user = $matches->first();
 
         if (! $user || ! Hash::check($credentials['password'], $user->getAuthPassword())) {
             RateLimiter::hit($throttleKey, 60);
